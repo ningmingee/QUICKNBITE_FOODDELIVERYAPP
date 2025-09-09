@@ -1,34 +1,49 @@
 package com.android.example.quicknbite.ui.theme
 
 import androidx.compose.material3.Typography
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import com.android.example.quicknbite.R
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// Set of Material typography styles to start with
+val Poppins = FontFamily(
+    Font(R.font.poppins_extrabold)
+)
+
+val LeagueSpartan = FontFamily(
+    Font(R.font.leaguespartan_light),
+    Font(R.font.leaguespartan_medium),
+    Font(R.font.leaguespartan_regular),
+    Font(R.font.leaguespartan_bold),
+    Font(R.font.leaguespartan_semibold)
+)
+
 val Typography = Typography(
-    bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
-    )
-    /* Other default text styles to override
-    titleLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 0.sp
+    displayLarge = TextStyle(
+        fontFamily = Poppins,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 36.sp
+    ),
+    displayMedium = TextStyle(
+        fontFamily = LeagueSpartan,
+        fontWeight = FontWeight.Bold,
+        fontSize = 16.sp
     ),
     labelSmall = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontFamily = LeagueSpartan,
+        fontWeight = FontWeight.Light,
+        fontSize = 14.sp
+    ),
+    labelMedium = TextStyle(
+        fontFamily = LeagueSpartan,
         fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
+        fontSize = 14.sp
+    ),
+    bodyLarge = TextStyle(
+        fontFamily = LeagueSpartan,
+        fontWeight = FontWeight.Normal,
+        fontSize = 14.sp
     )
-    */
 )
