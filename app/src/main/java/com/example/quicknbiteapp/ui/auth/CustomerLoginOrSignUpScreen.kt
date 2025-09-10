@@ -60,6 +60,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.quicknbiteapp.R
 import com.example.quicknbiteapp.ui.theme.QUICKNBITETheme
+import com.example.quicknbiteapp.utils.FacebookLoginHelper
 import com.example.quicknbiteapp.viewModel.AuthViewModel
 import kotlinx.coroutines.launch
 
@@ -68,7 +69,7 @@ import kotlinx.coroutines.launch
 fun CustomerLoginOrSignUpScreen(
     navController: NavHostController,
     authViewModel: AuthViewModel,
-    isLoginMode: Boolean = true
+    isLoginMode: Boolean = true,
 ) {
     var phoneNumber by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }

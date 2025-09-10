@@ -66,7 +66,7 @@ fun VendorOrderDetailScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Order #${orderId.take(8)}",
+                        text = "Order #${orderId.take(12)}",
                         color = MaterialTheme.colorScheme.onPrimary,
                         fontWeight = FontWeight.Bold
                     )

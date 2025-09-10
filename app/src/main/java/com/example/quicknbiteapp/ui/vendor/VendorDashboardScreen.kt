@@ -59,7 +59,6 @@ import com.example.quicknbiteapp.data.model.Vendor
 import com.example.quicknbiteapp.ui.state.VendorUiState
 import com.example.quicknbiteapp.viewModel.VendorViewModel
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VendorDashboardScreen(

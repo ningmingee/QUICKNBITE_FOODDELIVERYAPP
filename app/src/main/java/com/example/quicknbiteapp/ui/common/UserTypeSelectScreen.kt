@@ -56,13 +56,15 @@ import com.example.quicknbiteapp.ui.customer.PrivacyPolicyScreen
 import com.example.quicknbiteapp.ui.customer.TermsConditionsScreen
 import com.example.quicknbiteapp.ui.theme.QUICKNBITETheme
 import com.example.quicknbiteapp.ui.vendor.VendorAgreementScreen
+import com.example.quicknbiteapp.utils.FacebookLoginHelper
 import com.example.quicknbiteapp.utils.rememberFacebookLoginHelper
 import com.example.quicknbiteapp.utils.rememberGoogleSignInHelper
 
 @Composable
 fun UserTypeSelectScreen(
     navController: NavHostController,
-    authViewModel: AuthViewModel? = null
+    authViewModel: AuthViewModel? = null,
+    facebookLoginHelper: FacebookLoginHelper? = null
 ) {
     var isCustomerSide by remember { mutableStateOf(true) }
 
@@ -100,6 +102,7 @@ fun UserTypeSelectScreen(
             onSuccess = { token ->
                 val userType = "customer"
                 authViewModel?.signInWithFacebook(token, userType)
+                navController.navigate("customer_login")
             },
             onError = { error ->
                 authViewModel?.resetAuthState()
@@ -375,6 +378,7 @@ fun UserTypeSelectScreen(
 
                                 OutlinedButton(
                                     onClick = {
+                                        facebookLoginHelper.signIn(context as Activity)
                                         if (isCustomerSide && activity != null) {
                                             facebookLoginHelper.signIn(activity)
                                         }

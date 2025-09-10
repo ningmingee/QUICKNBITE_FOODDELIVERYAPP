@@ -22,6 +22,29 @@ class FacebookLoginHelper(private val context: Context) {
     private var onError: ((Exception) -> Unit)? = null
     private var onCancel: (() -> Unit)? = null
 
+    init {
+        setupFacebookCallback()
+    }
+
+    private fun setupFacebookCallback() {
+        loginManager.registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
+            override fun onSuccess(result: LoginResult) {
+                Log.d(TAG, "Facebook login successful.")
+                val token = result.accessToken.token
+                onSuccess?.invoke(token)
+            }
+
+            override fun onCancel() {
+                Log.d(TAG, "Facebook login cancelled.")
+                onCancel?.invoke()
+            }
+
+            override fun onError(error: FacebookException) {
+                Log.e(TAG, "Facebook login error:", error)
+                onError?.invoke(error)
+            }
+        })
+    }
 
     fun setupCallback(
         onSuccess: (String) -> Unit,
@@ -31,27 +54,10 @@ class FacebookLoginHelper(private val context: Context) {
         this.onSuccess = onSuccess
         this.onError = onError
         this.onCancel = onCancel
-
-        loginManager.registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
-            override fun onSuccess(result: LoginResult) {
-                Log.d(TAG, "Facebook login successful.")
-                val token = result.accessToken.token
-                onSuccess(token)
-            }
-
-            override fun onCancel() {
-                Log.d(TAG, "Facebook login cancelled.")
-                onCancel()
-            }
-
-            override fun onError(error: FacebookException) {
-                Log.e(TAG, "Facebook login error:", error)
-                onError(error)
-            }
-        })
     }
 
     fun signIn(activity: Activity) {
+        loginManager.logOut()
         loginManager.logInWithReadPermissions(
             activity,
             listOf("public_profile", "email")
@@ -60,6 +66,12 @@ class FacebookLoginHelper(private val context: Context) {
 
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         callbackManager.onActivityResult(requestCode, resultCode, data)
+    }
+
+    fun clearCallbacks() {
+        onSuccess = null
+        onError = null
+        onCancel = null
     }
 
     companion object {

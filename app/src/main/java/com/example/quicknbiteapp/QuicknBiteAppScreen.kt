@@ -41,6 +41,7 @@ import com.example.quicknbiteapp.ui.vendor.VendorOrderDetailScreen
 import com.example.quicknbiteapp.ui.vendor.VendorOrdersScreen
 import com.example.quicknbiteapp.ui.vendor.VendorReviewsScreen
 import com.example.quicknbiteapp.ui.vendor.VendorSettingsScreen
+import com.example.quicknbiteapp.utils.FacebookLoginHelper
 import com.example.quicknbiteapp.viewModel.AuthViewModel
 import com.example.quicknbiteapp.viewModel.CartViewModel
 import com.example.quicknbiteapp.viewModel.ChatViewModel
@@ -55,6 +56,7 @@ fun QuicknBiteAppScreen() {
     val cartViewModel: CartViewModel = viewModel()
     val chatViewModel: ChatViewModel = viewModel()
     val profileViewModel: ProfileViewModel = viewModel { ProfileViewModel(authViewModel) }
+
 
     NavHost(
         navController = navController,
@@ -76,7 +78,8 @@ fun QuicknBiteAppScreen() {
             CustomerLoginOrSignUpScreen(
                 navController = navController,
                 authViewModel = authViewModel,
-                isLoginMode = true
+                isLoginMode = true,
+
             )
         }
         composable("customer_signup") {

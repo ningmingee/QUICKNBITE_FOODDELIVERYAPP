@@ -10,6 +10,14 @@ import com.example.quicknbiteapp.data.model.CartItem
 import com.example.quicknbiteapp.data.model.CartSummary
 import com.example.quicknbiteapp.data.model.DeliveryOption
 
+
+// --- Payment Method Enum ---
+enum class PaymentMethod(val label: String) {
+    CASH("Cash"),
+    ONLINE_BANKING("Online Banking"),
+    CREDIT_DEBIT_CARD("Credit/Debit Card")
+}
+
 class CartViewModel : ViewModel() {
 
     // --- Cart Items ---
@@ -22,6 +30,15 @@ class CartViewModel : ViewModel() {
     // --- Points earned ---
     var bonusPoints by mutableIntStateOf(0)
         private set
+
+
+    // --- Payment Method ---
+    var paymentMethod by mutableStateOf("Cash") // default payment method
+        private set
+
+    fun selectPaymentMethod(option: String) {
+        paymentMethod = option
+    }
 
     // --- Cart item operations ---
     fun addToCart(item: CartItem) {

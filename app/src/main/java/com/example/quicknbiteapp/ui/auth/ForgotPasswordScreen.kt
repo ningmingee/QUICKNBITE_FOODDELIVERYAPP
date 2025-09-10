@@ -38,6 +38,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -76,6 +78,38 @@ fun ForgotPasswordScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+
+    val authState by authViewModel.authState.collectAsState()
+
+    LaunchedEffect(authState) {
+        when (authState) {
+            is AuthViewModel.AuthState.Loading -> {
+                isLoading = true
+            }
+            is AuthViewModel.AuthState.Success -> {
+                isLoading = false
+                val successState = authState as AuthViewModel.AuthState.Success
+                when (successState.userType) {
+                    "reset_email_sent" -> {
+                        currentStep = 2 // Move to instructions screen
+                    }
+                    "password_updated" -> {
+                        currentStep = 3 // Move to success screen
+                    }
+                }
+            }
+            is AuthViewModel.AuthState.Error -> {
+                isLoading = false
+                val errorState = authState as AuthViewModel.AuthState.Error
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar(errorState.message)
+                }
+            }
+            else -> {
+                isLoading = false
+            }
+        }
+    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },

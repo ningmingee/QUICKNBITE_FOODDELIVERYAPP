@@ -64,15 +64,6 @@ fun ProfileScreen(
                         color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.titleLarge
                     )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = stringResource(R.string.back_button),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
                 }
             )
         }
