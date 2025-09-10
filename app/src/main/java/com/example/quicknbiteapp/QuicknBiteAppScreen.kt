@@ -132,7 +132,10 @@ fun QuicknBiteAppScreen() {
             )
         }
         composable("vendor/reviews") {
-            VendorReviewsScreen(viewModel = vendorViewModel)
+            VendorReviewsScreen(
+                viewModel = vendorViewModel,
+                navController = navController
+            )
         }
         composable("vendor_menu") {
             VendorMenuScreen(navController = navController)

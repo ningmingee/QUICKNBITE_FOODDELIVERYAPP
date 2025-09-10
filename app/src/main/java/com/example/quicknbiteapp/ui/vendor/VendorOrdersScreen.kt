@@ -269,7 +269,7 @@ fun NewOrderCard(
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                text =  order.orderId.take(12),  // Show phone num
+                text =  order.orderId.take(15),  // Show phone num
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -488,7 +488,7 @@ fun CompletedOrderItem(
         ) {
             Column {
                 Text(
-                    text = "#${order.orderId.take(4).uppercase()}",
+                    text = "#${order.orderId.take(15).uppercase()}",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)

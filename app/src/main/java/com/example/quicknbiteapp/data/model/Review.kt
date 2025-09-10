@@ -15,16 +15,26 @@ data class Review(
     val orderId: String = "",
     val createdAt: Any? = null,
     val updatedAt: Any? = null
-){
-    fun getCreatedDate(): Date? {
+) {
+    fun getFormattedDate(): String {
         return when (createdAt) {
-            is Timestamp -> (createdAt as Timestamp).toDate()
-            is Long -> Date(createdAt as Long)
-            is String -> try { SimpleDateFormat(
-                "yyyy-MM-dd HH:mm:ss",
-                Locale.getDefault()
-            ).parse(createdAt as String) } catch (e: Exception) { null }
-            else -> null
+            is Timestamp -> {
+                val dateFormat = SimpleDateFormat("MMM dd, yyyy 'at' HH:mm", Locale.getDefault())
+                dateFormat.format(createdAt.toDate())
+            }
+
+            is Long -> {
+                val dateFormat = SimpleDateFormat("MMM dd, yyyy 'at' HH:mm", Locale.getDefault())
+                dateFormat.format(Date(createdAt))
+            }
+
+            is Date -> {
+                val dateFormat = SimpleDateFormat("MMM dd, yyyy 'at' HH:mm", Locale.getDefault())
+                dateFormat.format(createdAt)
+            }
+
+            else -> "Date not available"
         }
     }
 }
+

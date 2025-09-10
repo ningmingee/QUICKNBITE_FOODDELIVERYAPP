@@ -106,6 +106,7 @@ class FirestoreVendorRepository (
 
             val reviews = snapshot.documents.mapNotNull { doc ->
                 val data = doc.data ?: emptyMap()
+                Log.d(TAG, "Processing document ${doc.id}: ${data.keys}")
                 Review(
                     reviewId = doc.id,
                     vendorId = data["vendorId"] as? String ?: "",
@@ -118,7 +119,7 @@ class FirestoreVendorRepository (
                     updatedAt = data["updatedAt"]
                 )
             }
-
+            Log.d(TAG, "Successfully parsed ${reviews.size} reviews")
             Result.success(reviews)
         } catch (e: Exception) {
             Log.e(TAG, "Error getting reviews: ${e.message}")

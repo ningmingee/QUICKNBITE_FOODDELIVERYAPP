@@ -1,13 +1,37 @@
 package com.example.quicknbiteapp.ui.vendor
 
+import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -15,38 +39,97 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.quicknbiteapp.R
 import com.example.quicknbiteapp.data.model.Review
 import com.example.quicknbiteapp.data.model.ReviewStats
 import com.example.quicknbiteapp.viewModel.VendorViewModel
-import com.google.firebase.Timestamp
-import java.text.SimpleDateFormat
-import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VendorReviewsScreen(
-    viewModel: VendorViewModel
+    viewModel: VendorViewModel,
+    navController: NavController? = null
 ) {
     val reviews by viewModel.reviews.collectAsState()
+    val reviewStats by viewModel.reviewStats.collectAsState()
 
-    LaunchedEffect(Unit) { viewModel.loadVendorReviews() }
+    LaunchedEffect(Unit) {
+        viewModel.loadVendorReviews()
+    }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Customer Reviews") }) }
+        topBar = {
+            TopAppBar(
+                title = { Text("Customer Reviews") },
+                navigationIcon = {
+                    // ADD BACK BUTTON with null check
+                    if (navController != null) {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        }
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { viewModel.loadVendorReviews() }) {
+                        Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                    }
+                }
+
+            )
+        }
     ) { padding ->
         if (reviews.isEmpty()) {
             EmptyReviewsState()
         } else {
-            LazyColumn(modifier = Modifier.padding(padding)) {
-                items(reviews) { review ->
-                    CustomerReviewItem(review = review)
+            Column(modifier = Modifier.padding(padding)) {
+                // Show review statistics at the top
+                ReviewStatsHeader(reviewStats = reviewStats)
+
+                LazyColumn {
+                    items(reviews) { review ->
+                        CustomerReviewItem(review = review)
+                    }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun ReviewStatsHeader(reviewStats: ReviewStats) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(R.string.average_rating),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = "%.1f/5".format(reviewStats.averageRating),
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold
+            )
+            StarRating(rating = reviewStats.averageRating)
+            Text(
+                text = "Based on ${reviewStats.totalReviews} reviews",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -68,11 +151,11 @@ fun EmptyReviewsState() {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            "No Customer Reviews Yet",
+            text = "No Customer Reviews Yet",
             style = MaterialTheme.typography.headlineSmall
         )
         Text(
-            "Customer reviews will appear here once they rate your service",
+            text = "Customer reviews will appear here once they rate your service",
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 8.dp)
@@ -82,11 +165,19 @@ fun EmptyReviewsState() {
 
 @Composable
 fun CustomerReviewItem(review: Review) {
-    Card(modifier = Modifier.padding(16.dp)) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            // Header with user info and rating
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text(
-                    review.userName,
+                    text = review.userName,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -95,9 +186,34 @@ fun CustomerReviewItem(review: Review) {
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(review.comment)
-            review.createdAt?.toDate()?.let { date ->
+            Text(
+                text = review.getFormattedDate(),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Review comment
+            if (review.comment.isNotBlank()) {
                 Text(
-                    formatDate(date),
+                    review.comment,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            } else {
+                Text(
+                    "No comment provided",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontStyle = FontStyle.Italic
+                )
+            }
+
+            // Order reference if available
+            if (review.orderId.isNotBlank()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "Order #${review.orderId.take(15)}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -162,7 +278,9 @@ fun ReviewsStatsCard(reviewStats: ReviewStats, navController: NavController) {
             // Add a button to view all reviews
             Spacer(modifier = Modifier.height(12.dp))
             Button(
-                onClick = { navController.navigate("vendor/reviews") },
+                onClick = {
+                    navController.navigate("vendor/reviews")
+                },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = reviewStats.totalReviews > 0
             ) {
@@ -189,18 +307,4 @@ fun StarRating(rating: Float, maxStars: Int = 5) {
             style = MaterialTheme.typography.bodySmall
         )
     }
-}
-
-fun Any?.toDate(): Date? {
-    return when (this) {
-        is Timestamp -> this.toDate()
-        is Date -> this
-        is Long -> Date(this)
-        else -> null
-    }
-}
-
-// Add this date formatting function
-fun formatDate(date: Date): String {
-    return SimpleDateFormat("MMM dd, yyyy 'at' HH:mm", Locale.getDefault()).format(date)
 }

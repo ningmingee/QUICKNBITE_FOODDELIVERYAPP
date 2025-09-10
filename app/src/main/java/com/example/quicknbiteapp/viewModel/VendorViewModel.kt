@@ -198,10 +198,16 @@ class VendorViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val vendorId = getCurrentVendorId()
+                Log.d(TAG, "Loading reviews for vendor: $vendorId")
+
                 val reviewsResult = vendorRepository.getVendorReviews(vendorId)
                 if (reviewsResult.isSuccess) {
-                    _reviews.value = reviewsResult.getOrThrow()
-                    calculateReviewStats(_reviews.value)
+                    val reviews = reviewsResult.getOrThrow()
+                    Log.d(TAG, "Successfully loaded ${reviews.size} reviews")
+                    _reviews.value = reviews
+                    calculateReviewStats(reviews)
+                } else {
+                    Log.e(TAG, "Failed to load reviews: ${reviewsResult.exceptionOrNull()?.message}")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error loading reviews: ${e.message}")
@@ -212,6 +218,7 @@ class VendorViewModel : ViewModel() {
     private fun calculateReviewStats(reviews: List<Review>) {
         if (reviews.isEmpty()) {
             _reviewStats.value = ReviewStats()
+            Log.d(TAG, "No reviews found")
             return
         }
 
@@ -222,6 +229,7 @@ class VendorViewModel : ViewModel() {
             averageRating = averageRating,
             totalReviews = totalReviews
         )
+        Log.d(TAG, "Calculated stats: Average=$averageRating, Total=$totalReviews")
     }
 
     fun updateMenuItemAvailability(itemId: String, isAvailable: Boolean) {

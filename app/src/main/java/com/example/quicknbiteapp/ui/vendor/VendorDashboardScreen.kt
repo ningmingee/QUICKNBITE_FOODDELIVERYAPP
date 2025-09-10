@@ -105,13 +105,13 @@ fun VendorDashboardScreen(
                 LoadingScreen(modifier = modifier.fillMaxSize())
             }
             is VendorUiState.Success -> {
-                val reviewStats by viewModel.reviewStats.collectAsState()
+                val reviewStatsData: ReviewStats by viewModel.reviewStats.collectAsState()
                 DashboardContent(
                     vendor = state.vendor,
-                    reviewStats = reviewStats,
+                    reviewStats = reviewStatsData,
                     orders = state.orders,
                     innerPadding = innerPadding,
-                    navController = rememberNavController()
+                    navController = navController
                 )
             }
             is VendorUiState.Error -> {
