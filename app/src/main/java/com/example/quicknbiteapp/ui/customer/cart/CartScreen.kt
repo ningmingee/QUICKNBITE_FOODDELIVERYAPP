@@ -227,6 +227,3 @@ fun CartScreen(
         }
     )
 }
-
-
-

@@ -452,4 +452,8 @@ fun CheckoutScreen(
             }
         }
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> a8db42d234f8d0c263962b4ef4e9bcedd6882e4f
