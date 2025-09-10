@@ -223,7 +223,7 @@ fun CartScreen(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                stringResource(R.string.place_order),
+                                stringResource(R.string.checkout_title),
                                 fontSize = 18.sp,
                                 style = MaterialTheme.typography.bodyLarge
                             )
