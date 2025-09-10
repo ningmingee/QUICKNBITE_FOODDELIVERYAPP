@@ -66,7 +66,7 @@ fun VendorOrderDetailScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Order #${orderId.take(14)}",
+                        text = "Order #${orderId.take(15)}",
                         color = MaterialTheme.colorScheme.onPrimary,
                         fontWeight = FontWeight.Bold
                     )
@@ -152,7 +152,7 @@ fun OrderHeaderSection(order: Order) {
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                text = "Order #${order.orderId.take(14)}",
+                text = "Order #${order.orderId.take(15)}",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface

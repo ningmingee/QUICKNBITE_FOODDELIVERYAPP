@@ -65,7 +65,7 @@ fun VendorDashboardScreen(
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState() //uistate
 
     Scaffold(
         topBar = {

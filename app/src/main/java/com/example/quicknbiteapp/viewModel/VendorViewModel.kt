@@ -232,18 +232,6 @@ class VendorViewModel : ViewModel() {
         Log.d(TAG, "Calculated stats: Average=$averageRating, Total=$totalReviews")
     }
 
-    fun updateMenuItemAvailability(itemId: String, isAvailable: Boolean) {
-        viewModelScope.launch {
-            try {
-                vendorRepository.updateMenuItemAvailability(itemId, isAvailable)
-                // Reload data after update
-                loadVendorData()
-            } catch (e: Exception) {
-                Log.e(TAG, "Error updating item: ${e.message}")
-            }
-        }
-    }
-
     fun updateOrderStatus(orderId: String, status: OrderStatus) {
         viewModelScope.launch {
             try {
@@ -252,7 +240,6 @@ class VendorViewModel : ViewModel() {
                 loadVendorData()
             } catch (e: Exception) {
                 Log.e(TAG, "Error updating order: ${e.message}")
-                // You might want to show a snackbar or toast here
             }
         }
     }
@@ -326,12 +313,5 @@ class VendorViewModel : ViewModel() {
     fun refreshData() {
         Log.d(TAG, "Manual refresh triggered")
         loadVendorData()
-    }
-
-    // Handle the case where vendor is not found
-    fun handleVendorNotFound() {
-        _uiState.value = VendorUiState.Empty(
-            message = "Vendor profile not found. Please complete your vendor profile setup."
-        )
     }
 }

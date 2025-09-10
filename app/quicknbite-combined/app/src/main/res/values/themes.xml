@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.QuicknBiteApp" parent="android:Theme.Material.Light.NoActionBar">
+    </style>
+
+    <style name="Theme.App.QuicknBiteApp" parent="Theme.SplashScreen">
+        <item name="android:windowSplashScreenBackground" tools:targetApi="31">@color/white</item>
+        <item name="android:windowSplashScreenAnimatedIcon" tools:ignore="NewApi">@drawable/logoicon</item>
+        <item name="android:windowSplashScreenAnimationDuration" tools:targetApi="31">1000</item>
+        <item name="postSplashScreenTheme">@style/Theme.QuicknBiteApp</item>
+    </style>
+</resources>

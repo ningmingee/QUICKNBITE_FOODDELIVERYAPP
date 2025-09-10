@@ -121,7 +121,7 @@ fun QuicknBiteAppScreen() {
             )
         }
         composable(
-            route = "vendor_order_detail/{orderId}",
+            "vendor_order_detail/{orderId}",
             arguments = listOf(navArgument("orderId") { type = NavType.StringType })
         ) { backStackEntry ->
             val orderId = backStackEntry.arguments?.getString("orderId") ?: ""
