@@ -17,9 +17,9 @@ class ChatViewModel : ViewModel() {
         private set
 
     val chats = mutableStateListOf(
-        ChatItem(1, "JOHN", "GrabFood Order • Mon", "This chat remains open for this order", mutableListOf("Hi John", "Your order is confirmed")),
-        ChatItem(2, "Delivery Rider", "Order #456789", "Your food is on the way 🚴‍♂️", mutableListOf("On my way", "Arriving soon")),
-        ChatItem(3, "Support", "Help Center", "How can we help you?", mutableListOf("Hello", "Need assistance?"))
+        ChatItem(1, "JOHN", "GrabFood Order • Mon", "This chat remains open for this order", mutableStateListOf("Hi John", "Your order is confirmed")),
+        ChatItem(2, "Delivery Rider", "Order #456789", "Your food is on the way 🚴‍♂️", mutableStateListOf("On my way", "Arriving soon")),
+        ChatItem(3, "Support", "Help Center", "How can we help you?", mutableStateListOf("Hello", "Need assistance?"))
     )
 
     val notifications = listOf(

@@ -1,4 +1,4 @@
-package com.example.quicknbiteapp.ui.theme
+ package com.example.quicknbiteapp.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
