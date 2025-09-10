@@ -119,7 +119,7 @@ class FirestoreVendorRepository (
                     updatedAt = data["updatedAt"]
                 )
             }
-            Log.d(TAG, "Successfully parsed ${reviews.size} reviews")
+            Log.d(TAG, "Successfully see ${reviews.size} reviews")
             Result.success(reviews)
         } catch (e: Exception) {
             Log.e(TAG, "Error getting reviews: ${e.message}")

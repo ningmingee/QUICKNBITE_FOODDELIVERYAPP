@@ -50,7 +50,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.quicknbiteapp.R
 import com.example.quicknbiteapp.data.model.Order
 import com.example.quicknbiteapp.data.model.OrderStatus

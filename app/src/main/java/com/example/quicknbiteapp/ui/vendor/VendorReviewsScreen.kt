@@ -213,7 +213,7 @@ fun CustomerReviewItem(review: Review) {
             if (review.orderId.isNotBlank()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    "Order #${review.orderId.take(15)}",
+                    "Order #${review.orderId.take(14)}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

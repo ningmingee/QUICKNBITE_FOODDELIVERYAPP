@@ -16,6 +16,7 @@ data class Review(
     val createdAt: Any? = null,
     val updatedAt: Any? = null
 ) {
+    // Date formatted
     fun getFormattedDate(): String {
         return when (createdAt) {
             is Timestamp -> {

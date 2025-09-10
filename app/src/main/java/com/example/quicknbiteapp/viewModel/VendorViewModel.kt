@@ -240,7 +240,6 @@ class VendorViewModel : ViewModel() {
                 loadVendorData()
             } catch (e: Exception) {
                 Log.e(TAG, "Error updating item: ${e.message}")
-                // You might want to show a snackbar or toast here
             }
         }
     }
