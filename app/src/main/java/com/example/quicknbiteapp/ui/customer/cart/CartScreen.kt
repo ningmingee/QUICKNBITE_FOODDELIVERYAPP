@@ -1,6 +1,7 @@
 package com.example.quicknbiteapp.ui.customer.cart
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,20 +13,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.quicknbiteapp.R
 import com.example.quicknbiteapp.viewModel.CartViewModel
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.background
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.ui.res.stringResource
-import com.example.quicknbiteapp.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,6 +36,7 @@ fun CartScreen(
     val cartItems = cartViewModel.cartItems
     val summary by remember { derivedStateOf { cartViewModel.getSummary() } }
     val navBarPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val bottomBarHeight = 90.dp + navBarPadding
 
     Scaffold(
         topBar = {
@@ -69,7 +68,7 @@ fun CartScreen(
             ) {
                 Column(modifier = Modifier.fillMaxSize()) {
 
-                    // "Order" header + Add Item button
+                    // Add Item Button at the top
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -87,11 +86,12 @@ fun CartScreen(
                         }
                     }
 
-                    // Scrollable list of cart items
+                    // Scrollable cart items
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(start = 16.dp, end = 16.dp, bottom = 200.dp),
+                            .padding(horizontal = 16.dp)
+                            .padding(bottom = 120.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         if (cartItems.isEmpty()) {
@@ -154,9 +154,7 @@ fun CartScreen(
                                         Row(
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            IconButton(onClick = {
-                                                cartViewModel.decreaseItemQuantity(item)
-                                            }) {
+                                            IconButton(onClick = { cartViewModel.decreaseItemQuantity(item) }) {
                                                 Icon(
                                                     Icons.Default.Remove,
                                                     contentDescription = "Decrease",
@@ -168,9 +166,7 @@ fun CartScreen(
                                                 fontWeight = FontWeight.Bold,
                                                 style = MaterialTheme.typography.bodyLarge
                                             )
-                                            IconButton(onClick = {
-                                                cartViewModel.increaseItemQuantity(item)
-                                            }) {
+                                            IconButton(onClick = { cartViewModel.increaseItemQuantity(item) }) {
                                                 Icon(
                                                     Icons.Default.Add,
                                                     contentDescription = "Increase",
@@ -192,21 +188,17 @@ fun CartScreen(
                     }
                 }
 
-                // Bottom Summary + Checkout
+                // Bottom Total + Checkout
                 if (cartItems.isNotEmpty()) {
                     Column(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
                             .fillMaxWidth()
                             .background(MaterialTheme.colorScheme.surface)
-                            .padding(
-                                start = 16.dp,
-                                end = 16.dp,
-                                bottom = 90.dp + navBarPadding
-                            ),
+                            .padding(horizontal = 16.dp, vertical = navBarPadding),
                         horizontalAlignment = Alignment.Start
                     ) {
-                        HorizontalDivider(
+                        Divider(
                             thickness = 1.dp,
                             color = MaterialTheme.colorScheme.outlineVariant
                         )
@@ -228,12 +220,10 @@ fun CartScreen(
                                 style = MaterialTheme.typography.bodyLarge
                             )
                         }
+                        Spacer(modifier = Modifier.height(12.dp))
                     }
                 }
             }
         }
     )
 }
-
-
-

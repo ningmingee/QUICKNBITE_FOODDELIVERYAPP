@@ -224,6 +224,11 @@
     <string name="layers_bakeshop_banner">Layer\'s Bakeshop Banner</string>
     <string name="empty_cart">Empty Cart</string>
 
+    <string name="payment_method">Payment Method</string>
+    <string name="cash">Cash</string>
+    <string name="online_banking">Online Banking</string>
+    <string name="credit_debit_card">Credit/Debit Card</string>
+
     <string name="default_web_client_id">67894935048-3kuk3827d0lo1up4cisgbl7b01gsas8f.apps.googleusercontent.com</string>
     <string name="sign_out">Sign Out</string>
 </resources>
