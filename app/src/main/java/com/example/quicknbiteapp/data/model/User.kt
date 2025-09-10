@@ -10,6 +10,9 @@ data class User(
     val operatingHours: String = "",
     val businessAddress: String = "",
     val userType: String = "customer", // "customer" or "vendor"
+    val pushNotifications: Boolean = true,
+    val emailNotifications: Boolean = true,
+    val profileImageUrl: String = "",
     val phoneNumber: String? = null,
     val createdAt: Timestamp = Timestamp.now()
 )

@@ -1,5 +1,6 @@
 package com.example.quicknbiteapp.ui.vendor
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -65,6 +66,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.quicknbiteapp.R
+import com.example.quicknbiteapp.ui.vendor.components.ProfileImagePicker
 import com.example.quicknbiteapp.viewModel.AuthViewModel
 import com.example.quicknbiteapp.viewModel.VendorViewModel
 
@@ -79,14 +81,15 @@ fun VendorSettingsScreen(
     val currentUser by authViewModel.currentUser.collectAsState()
     val vendorSettings by vendorViewModel.vendorSettings.collectAsState()
     var showSignOutDialog by remember { mutableStateOf(false) }
+    val isLoading by vendorViewModel.isLoading.collectAsState()
 
     // Load settings when screen appears
     LaunchedEffect(Unit) {
         vendorViewModel.loadVendorSettings()
     }
 
-    var notificationsEnabled by remember { mutableStateOf(true) }
-    var emailNotifications by remember { mutableStateOf(true) }
+    val pushNotificationsEnabled = vendorSettings?.pushNotifications ?: true
+    val emailNotificationsEnabled = vendorSettings?.emailNotifications ?: true
 
     Scaffold(
         topBar = {
@@ -97,15 +100,6 @@ fun VendorSettingsScreen(
                         color = MaterialTheme.colorScheme.onPrimary,
                         fontWeight = FontWeight.Bold
                     )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary
@@ -122,8 +116,13 @@ fun VendorSettingsScreen(
         ) {
             // Profile Header
             ProfileHeaderSection(
-                businessName = vendorSettings?.businessName ?: "Fat Burger",
-                email = currentUser?.email ?: "No email"
+                businessName = vendorSettings?.businessName ?: "Business Name",
+                email = currentUser?.email ?: "No email",
+                profileImageUrl = vendorSettings?.profileImageUrl ?: "",
+                onImageSelected = { uri ->
+                    vendorViewModel.uploadProfileImage(uri)
+                },
+                navController = navController
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -182,15 +181,25 @@ fun VendorSettingsScreen(
                     icon = Icons.Default.Notifications,
                     title = "Push Notifications",
                     subtitle = "Order updates and alerts",
-                    checked = notificationsEnabled,
-                    onCheckedChange = { vendorViewModel.updateNotificationSettings(it, emailNotifications) }
+                    checked = pushNotificationsEnabled,
+                    onCheckedChange = { enabled ->
+                        vendorViewModel.updateNotificationSettings(
+                            pushEnabled = enabled,
+                            emailEnabled = emailNotificationsEnabled
+                        )
+                    }
                 )
                 SettingsItemWithSwitch(
                     icon = Icons.Default.Email,
                     title = "Email Notifications",
                     subtitle = "Reports and summaries",
-                    checked = emailNotifications,
-                    onCheckedChange = { vendorViewModel.updateNotificationSettings(notificationsEnabled, it) }
+                    checked = emailNotificationsEnabled,
+                    onCheckedChange = { enabled ->
+                        vendorViewModel.updateNotificationSettings(
+                            pushEnabled = pushNotificationsEnabled,
+                            emailEnabled = enabled
+                        )
+                    }
                 )
             }
 
@@ -202,19 +211,19 @@ fun VendorSettingsScreen(
                     icon = Icons.AutoMirrored.Filled.Help,
                     title = "Help & Support",
                     subtitle = "Get help with your account",
-                    onClick = { /* Navigate to help */ }
+                    onClick = { navController.navigate("help_support") }
                 )
                 SettingsItem(
                     icon = Icons.Default.Info,
                     title = "About Quick & Bite",
                     subtitle = "App version 1.0.0",
-                    onClick = { /* Show about dialog */ }
+                    onClick = { navController.navigate("about_app") }
                 )
                 SettingsItem(
                     icon = Icons.Default.PrivacyTip,
                     title = "Privacy Policy",
                     subtitle = "How we handle your data",
-                    onClick = { /* Navigate to privacy policy */ }
+                    onClick = { navController.navigate("privacy_policy") }
                 )
             }
 
@@ -271,7 +280,15 @@ fun VendorSettingsScreen(
 }
 
 @Composable
-fun ProfileHeaderSection(businessName: String, email: String)  {
+fun ProfileHeaderSection(
+    businessName: String,
+    email: String,
+    profileImageUrl: String = "",
+    onImageSelected: (Uri) -> Unit = {},
+    isLoading: Boolean = false,
+    navController: NavHostController? = null,
+    modifier: Modifier = Modifier
+)  {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -287,20 +304,18 @@ fun ProfileHeaderSection(businessName: String, email: String)  {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Profile Avatar
-            Icon(
-                imageVector = Icons.Default.AccountCircle,
-                contentDescription = "Profile",
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(CircleShape),
-                tint = MaterialTheme.colorScheme.primary
+            ProfileImagePicker(
+                imageUrl = profileImageUrl,
+                onImageSelected = onImageSelected,
+                isLoading = isLoading,
+                modifier = Modifier.size(120.dp)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // Business Name
             Text(
-                text = "Fat Burger",
+                text = businessName,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -321,8 +336,9 @@ fun ProfileHeaderSection(businessName: String, email: String)  {
 
             // Edit Profile Button
             OutlinedButton(
-                onClick = { /* Navigate to edit profile */ },
-                shape = RoundedCornerShape(20.dp)
+                onClick = { navController?.navigate("edit_profile") },
+                shape = RoundedCornerShape(20.dp),
+                enabled = !isLoading
             ) {
                 Text("Edit Profile")
             }

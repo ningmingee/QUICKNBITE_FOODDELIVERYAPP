@@ -29,11 +29,16 @@ import com.example.quicknbiteapp.ui.customer.orderTracking.OrderTrackingScreen
 import com.example.quicknbiteapp.ui.customer.profile.ProfileScreen
 import com.example.quicknbiteapp.ui.customer.profile.SettingsScreen
 import com.example.quicknbiteapp.ui.theme.QUICKNBITETheme
+import com.example.quicknbiteapp.ui.vendor.AboutAppScreen
 import com.example.quicknbiteapp.ui.vendor.AccountInfoScreen
 import com.example.quicknbiteapp.ui.vendor.BusinessAddressScreen
 import com.example.quicknbiteapp.ui.vendor.BusinessProfileScreen
 import com.example.quicknbiteapp.ui.vendor.ChangePasswordScreen
+import com.example.quicknbiteapp.ui.vendor.EditProfileScreen
+import com.example.quicknbiteapp.ui.vendor.HelpSupportScreen
 import com.example.quicknbiteapp.ui.vendor.OperatingHoursScreen
+import com.example.quicknbiteapp.ui.vendor.PaymentMethodsScreen
+import com.example.quicknbiteapp.ui.vendor.PrivacyPolicyScreen
 import com.example.quicknbiteapp.ui.vendor.VendorDashboardScreen
 import com.example.quicknbiteapp.ui.vendor.VendorMainScreen
 import com.example.quicknbiteapp.ui.vendor.VendorMenuScreen
@@ -143,6 +148,9 @@ fun QuicknBiteAppScreen() {
         composable("vendor_settings") {
             VendorSettingsScreen(navController = navController, authViewModel = authViewModel)
         }
+        composable("edit_profile") {
+            EditProfileScreen(navController = navController, vendorViewModel = vendorViewModel, authViewModel = authViewModel)
+        }
         composable("business_profile") {
             BusinessProfileScreen(viewModel = vendorViewModel, navController = navController)
         }
@@ -154,6 +162,18 @@ fun QuicknBiteAppScreen() {
         }
         composable("account_info") {
             AccountInfoScreen(viewModel = vendorViewModel, navController = navController)
+        }
+        composable("payment_methods") {
+            PaymentMethodsScreen(navController = navController)
+        }
+        composable("help_support") {
+            HelpSupportScreen(navController = navController)
+        }
+        composable("about_app") {
+            AboutAppScreen(navController = navController)
+        }
+        composable("privacy_policy") {
+            PrivacyPolicyScreen(navController = navController)
         }
         composable("change_password") {
             ChangePasswordScreen(authViewModel = authViewModel, navController = navController)

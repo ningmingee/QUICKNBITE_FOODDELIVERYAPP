@@ -1,6 +1,7 @@
 package com.example.quicknbiteapp.repository
 
 import com.example.quicknbiteapp.data.model.User
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
@@ -45,5 +46,19 @@ class VendorSettingsRepository (
             "phoneNumber" to phoneNumber
         )
         return updateVendorSettings(userId, updates)
+    }
+
+    suspend fun updateNotificationSettings(userId: String, pushEnabled: Boolean, emailEnabled: Boolean): Boolean {
+        return try {
+            val updates = mapOf(
+                "pushNotifications" to pushEnabled,
+                "emailNotifications" to emailEnabled,
+                "updatedAt" to com.google.firebase.Timestamp.now()
+            )
+            firestore.collection("users").document(userId).update(updates).await()
+            true
+        } catch (e: Exception) {
+            false
+        }
     }
 }
