@@ -5,5 +5,15 @@ enum class OrderStatus {
     PREPARING,
     READY_FOR_PICKUP,
     COMPLETED,
-    CANCELLED
+    CANCELLED;
+
+    companion object {
+        fun fromString(value: String): OrderStatus {
+            return try {
+                valueOf(value.uppercase())
+            } catch (e: IllegalArgumentException) {
+                PENDING // Default fallback
+            }
+        }
+    }
 }

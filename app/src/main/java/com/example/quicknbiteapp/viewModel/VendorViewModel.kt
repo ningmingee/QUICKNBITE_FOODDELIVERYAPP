@@ -3,6 +3,7 @@ package com.example.quicknbiteapp.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.quicknbiteapp.data.model.Order
 import com.example.quicknbiteapp.data.model.OrderStatus
 import com.example.quicknbiteapp.data.model.Review
 import com.example.quicknbiteapp.data.model.ReviewStats
@@ -230,6 +231,65 @@ class VendorViewModel : ViewModel() {
             totalReviews = totalReviews
         )
         Log.d(TAG, "Calculated stats: Average=$averageRating, Total=$totalReviews")
+    }
+
+    fun getOrderTimeline(order: Order): List<Pair<String, String>> {
+        val timeline = mutableListOf<Pair<String, String>>()
+        val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+
+        // Add status changes from history in chronological order
+        val statusEvents = order.getStatusEvents()
+
+        if (statusEvents.isEmpty()) {
+            // If no status history, just show creation time
+            timeline.add(
+                dateFormat.format(order.getCreationDate()) to "Order received"
+            )
+        } else {
+            // Add each status event with proper description
+            statusEvents.forEach { (status, timestamp) ->
+                val time = dateFormat.format(timestamp)
+                val event = when (status) {
+                    OrderStatus.PENDING -> "Order received"
+                    OrderStatus.PREPARING -> "Order accepted"
+                    OrderStatus.READY_FOR_PICKUP -> "Ready for pickup"
+                    OrderStatus.COMPLETED -> "Order completed"
+                    OrderStatus.CANCELLED -> "Order cancelled"
+                }
+                timeline.add(time to event)
+            }
+        }
+
+        return timeline.sortedBy { it.first }
+    }
+
+    fun getDetailedOrderTimeline(order: Order): List<Pair<String, String>> {
+        val timeline = mutableListOf<Pair<String, String>>()
+        val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+
+        // Always show order creation as the first event
+        timeline.add(
+            dateFormat.format(order.getCreationDate()) to "Order placed"
+        )
+
+        // Get status events excluding PENDING (since we already have "Order placed")
+        val statusEvents = order.getStatusEvents()
+            .filter { it.first != OrderStatus.PENDING }
+
+        // Add other status events
+        statusEvents.forEach { (status, timestamp) ->
+            val time = dateFormat.format(timestamp)
+            val event = when (status) {
+                OrderStatus.PREPARING -> "Order accepted by vendor"
+                OrderStatus.READY_FOR_PICKUP -> "Order ready for pickup"
+                OrderStatus.COMPLETED -> "Order delivered"
+                OrderStatus.CANCELLED -> "Order cancelled"
+                else -> "Status updated" // Should not happen due to filter
+            }
+            timeline.add(time to event)
+        }
+
+        return timeline
     }
 
     fun updateOrderStatus(orderId: String, status: OrderStatus) {

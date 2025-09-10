@@ -1,5 +1,6 @@
 package com.example.quicknbiteapp.ui.vendor
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,8 +11,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -19,6 +22,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -36,9 +40,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.quicknbiteapp.data.model.Order
 import com.example.quicknbiteapp.data.model.OrderItem
@@ -111,8 +117,13 @@ fun VendorOrderDetailScreen(
 fun OrderDetailContent(
     order: Order,
     onUpdateStatus: (OrderStatus) -> Unit,
-    innerPadding: PaddingValues
+    innerPadding: PaddingValues,
+    viewModel: VendorViewModel = viewModel()
 ) {
+    val timelineEvents by remember(order) {
+        derivedStateOf { viewModel.getOrderTimeline(order) }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -124,6 +135,28 @@ fun OrderDetailContent(
         OrderHeaderSection(order)
 
         Spacer(modifier = Modifier.height(24.dp))
+
+        // Delivery Address Section
+        if (!order.deliveryAddress.isNullOrEmpty()) {
+            DeliveryAddressSection(order)
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // Order Items Section
+        OrderItemsSection(order)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Special Instructions Section (NEW)
+        if (!order.specialInstructions.isNullOrEmpty()) {
+            SpecialInstructionsSection(order)
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // Payment Information Section (NEW)
+        PaymentInfoSection(order)
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Order Timeline
         OrderTimelineSection(order)
@@ -162,7 +195,7 @@ fun OrderHeaderSection(order: Order) {
 
             val dateFormat = SimpleDateFormat("dd/MM/yyyy - HH:mm", Locale.getDefault())
             Text(
-                text = dateFormat.format(order.createdAt),
+                text = dateFormat.format(order.getCreationDate()),
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -233,7 +266,261 @@ fun OrderHeaderSection(order: Order) {
 }
 
 @Composable
-fun OrderTimelineSection(order: Order) {
+fun DeliveryAddressSection(order: Order) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "Delivery Address",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = order.deliveryAddress ?: "No address provided",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                lineHeight = 20.sp
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Delivery Type:",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = order.orderType.replace("_", " "),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun OrderItemsSection(order: Order) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "Order Items",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            if (order.items.isEmpty()) {
+                Text(
+                    text = "No items in this order",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                order.items.forEachIndexed { index, item ->
+                    OrderItemCard(item)
+                    if (index < order.items.size - 1) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun OrderItemCard(item: OrderItem) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f)
+        ),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "${item.quantity}x ${item.name}",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                if (!item.specialInstructions.isNullOrEmpty()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Note: ${item.specialInstructions}",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontStyle = FontStyle.Italic
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "RM ${item.pricePerItem} each",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Text(
+                text = "RM ${item.pricePerItem * item.quantity}",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+
+@Composable
+fun SpecialInstructionsSection(order: Order) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "Special Instructions",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = order.specialInstructions ?: "No special instructions",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                lineHeight = 20.sp
+            )
+        }
+    }
+}
+
+@Composable
+fun PaymentInfoSection(order: Order) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "Payment Information",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Payment Method:",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = order.paymentMethod ?: "Not specified",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Payment Status:",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = order.paymentStatus ?: "Pending",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = when (order.paymentStatus?.uppercase()) {
+                        "PAID" -> MaterialTheme.colorScheme.primary
+                        "FAILED" -> MaterialTheme.colorScheme.error
+                        "REFUNDED" -> MaterialTheme.colorScheme.tertiary
+                        else -> MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                )
+            }
+
+            if (!order.paymentDetails.isNullOrEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Payment Details:",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = order.paymentDetails ?: "",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun OrderTimelineSection(order: Order, viewModel: VendorViewModel = viewModel()) {
+    val timelineEvents by remember(order) {
+        derivedStateOf { viewModel.getDetailedOrderTimeline(order) }
+    }
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -252,43 +539,72 @@ fun OrderTimelineSection(order: Order) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Timeline items - you can expand this with actual timestamps
-            TimelineItem("11:00", "Order received", "Accepted in 10s")
-            TimelineItem("11:00", "Order accepted", "")
-            TimelineItem("11:00", "Rider near pick up", "")
-            TimelineItem("11:00", "Order picked up", "")
-            TimelineItem("11:00", "Order delivered", "")
+            // Display actual timeline events
+            if (timelineEvents.isEmpty()) {
+                Text(
+                    text = "No timeline events yet",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                timelineEvents.forEachIndexed { index, (time, event) ->
+                    TimelineItem(
+                        time = time,
+                        event = event,
+                        isLast = index == timelineEvents.size - 1
+                    )
+                    if (index < timelineEvents.size - 1) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
-fun TimelineItem(time: String, event: String, description: String) {
+fun TimelineItem(time: String, event: String, isLast: Boolean = false) {
     Row(
         modifier = Modifier.padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Time circle
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = time,
+                color = MaterialTheme.colorScheme.onPrimary,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        // Event description
         Text(
-            text = time,
+            text = event,
             fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.width(60.dp)
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.weight(1f)
         )
 
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = event,
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurface
+        // Connector line (except for last item)
+        if (!isLast) {
+            Spacer(modifier = Modifier.width(12.dp))
+            Divider(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(24.dp),
+                color = MaterialTheme.colorScheme.outlineVariant
             )
-            if (description.isNotEmpty()) {
-                Text(
-                    text = description,
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
         }
     }
 }

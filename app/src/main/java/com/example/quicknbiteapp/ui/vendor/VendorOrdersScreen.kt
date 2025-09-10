@@ -495,7 +495,7 @@ fun CompletedOrderItem(
                 )
                 val dateFormat = SimpleDateFormat("dd/MM/yyyy - HH:mm", Locale.getDefault())
                 Text(
-                    text = dateFormat.format(order.createdAt),
+                    text = dateFormat.format(order.getCreationDate()),
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )

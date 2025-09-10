@@ -3,7 +3,9 @@ package com.example.quicknbiteapp.repository
 import android.util.Log
 import com.example.quicknbiteapp.data.model.MenuItem
 import com.example.quicknbiteapp.data.model.Order
+import com.example.quicknbiteapp.data.model.OrderItem
 import com.example.quicknbiteapp.data.model.OrderStatus
+import com.example.quicknbiteapp.data.model.OrderType
 import com.example.quicknbiteapp.data.model.Review
 import com.example.quicknbiteapp.data.model.Vendor
 import com.google.firebase.Timestamp
@@ -26,7 +28,7 @@ class FirestoreVendorRepository (
             Log.d(TAG, "=== START getVendorData ===")
             Log.d(TAG, "Looking for vendor data for user ID: $userId")
 
-            // 1. First get user document to find the vendorId
+            // get user document to find the vendorId
             val userDoc = firestore.collection("users").document(userId).get().await()
             if (!userDoc.exists()) {
                 Log.d(TAG, "User document not found at users/$userId")
@@ -37,7 +39,7 @@ class FirestoreVendorRepository (
             val vendorIdFromUser = userData["vendorId"] as? String ?: "test_vendor_001" // DEFAULT TO test_vendor_001
             Log.d(TAG, "Using vendor ID: $vendorIdFromUser")
 
-            // 2. Get vendor document
+            // Get vendor document
             val vendorDoc = firestore.collection("vendors").document(vendorIdFromUser).get().await()
             Log.d(TAG, "Vendor document exists: ${vendorDoc.exists()}")
 
@@ -50,7 +52,7 @@ class FirestoreVendorRepository (
                     Log.d(TAG, "$key: $value (${value?.javaClass?.simpleName})")
                 }
 
-                // 3. Create Vendor object - HANDLE ALL DATA TYPES PROPERLY
+                // 3. Create Vendor object
                 val vendor = Vendor(
                     id = vendorDoc.id,
                     userId = userId,
@@ -126,8 +128,6 @@ class FirestoreVendorRepository (
             Result.failure(e)
         }
     }
-
-
     private fun parseDouble(value: Any?): Double {
         return when (value) {
             is Double -> value
@@ -159,46 +159,79 @@ class FirestoreVendorRepository (
         }
     }
 
-
-
     override suspend fun getOrders(vendorId: String): Result<List<Order>> {
         return try {
             Log.d(TAG, "=== START getOrders ===")
-            Log.d(TAG, "Attempting to get orders for vendorId: $vendorId")
-            Log.d(TAG, "Current authenticated user UID: ${FirebaseAuth.getInstance().currentUser?.uid}")
 
             val snapshot = firestore.collection("orders")
                 .whereEqualTo("vendorId", vendorId)
                 .get()
                 .await()
 
-            Log.d(TAG, "Orders query: Snapshot is empty? ${snapshot.isEmpty}")
             Log.d(TAG, "Orders query: Found ${snapshot.documents.size} documents.")
 
-            // Log each document found
-            snapshot.documents.forEachIndexed { index, doc ->
-                Log.d(TAG, "Order document $index - ID: ${doc.id}, Data: ${doc.data}")
-            }
-
             val orders = snapshot.documents.mapNotNull { doc ->
-                Log.d(TAG, "Mapping order document: ${doc.id} -> ${doc.data}")
-                val order = doc.toObject(Order::class.java)?.copy(orderId = doc.id)
-                if (order != null) {
-                    Log.d(TAG, "Successfully mapped order: ${order.orderId}: ${order.status} - RM${order.totalAmount}")
-                } else {
-                    Log.d(TAG, "Failed to map order from document: ${doc.id}")
+                try {
+                    val data = doc.data ?: emptyMap()
+
+                    // MANUALLY MAP THE FIELDS to handle data type differences
+                    Order(
+                        orderId = doc.id,
+                        vendorId = data["vendorId"] as? String ?: "",
+                        customerId = data["customerId"] as? String ?: "",
+                        customerName = data["customerName"] as? String ?: "Unknown Customer",
+                        items = parseOrderItems(data["items"]),
+                        subtotal = parseDouble(data["subtotal"]),
+                        deliveryFee = parseDouble(data["deliveryFee"]),
+                        serviceFee = parseDouble(data["serviceFee"]),
+                        totalAmount = parseDouble(data["totalAmount"]),
+                        status = parseOrderStatus(data["status"]),
+                        orderType = data["orderType"] as? String ?: OrderType.DELIVERY.name,
+                        statusHistory = parseStatusHistory(data["statusHistory"]),
+                        deliveryAddress = data["deliveryAddress"] as? String,
+                        specialInstructions = data["specialInstructions"] as? String,
+                        createdAt = data["createdAt"] as Timestamp,
+                        updatedAt = data["updatedAt"] as Timestamp,
+                        paymentDetails = data["paymentDetails"] as? String,
+                        paymentMethod = data["paymentMethod"] as? String,
+                        paymentStatus = data["paymentStatus"] as? String,
+                        customerPhoneNumber = data["customerPhoneNumber"] as? String
+                    )
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error mapping order ${doc.id}: ${e.message}")
+                    null
                 }
-                order
             }
 
             Log.d(TAG, "Successfully mapped ${orders.size} orders")
-            Log.d(TAG, "=== END getOrders - SUCCESS ===")
             Result.success(orders)
         } catch (e: Exception) {
             Log.e(TAG, "Error getting orders: ${e.message}")
-            Log.e(TAG, "Error stack trace: ${e.stackTraceToString()}")
-            Log.d(TAG, "=== END getOrders - ERROR ===")
             Result.failure(e)
+        }
+    }
+
+    // Add these helper functions to your repository:
+    private fun parseOrderStatus(status: Any?): OrderStatus {
+        return when (status) {
+            is String -> OrderStatus.valueOf(status)
+            is OrderStatus -> status
+            else -> OrderStatus.PENDING
+        }
+    }
+
+    private fun parseOrderItems(items: Any?): List<OrderItem> {
+        return if (items is List<*>) {
+            items.filterIsInstance<Map<String, Any>>().map { itemData ->
+                OrderItem(
+                    menuItemId = itemData["menuItemId"] as? String ?: "",
+                    name = itemData["name"] as? String ?: "Unknown Item",
+                    pricePerItem = parseDouble(itemData["pricePerItem"]),
+                    quantity = parseInt(itemData["quantity"])
+                )
+            }
+        } else {
+            emptyList()
         }
     }
 
@@ -268,9 +301,23 @@ class FirestoreVendorRepository (
             Log.d(TAG, "=== START updateOrderStatus ===")
             Log.d(TAG, "Updating order: $orderId, status: $status")
 
+            // Get current timestamp
+            val timestamp = Timestamp.now()
+
+            // First get current order to preserve existing status history
+            val currentOrderDoc = firestore.collection("orders").document(orderId).get().await()
+            val currentData = currentOrderDoc.data ?: emptyMap()
+            val currentStatusHistory = currentData["statusHistory"] as? Map<String, Any> ?: emptyMap()
+
+            // Create updated status history
+            val updatedStatusHistory = currentStatusHistory.toMutableMap().apply {
+                put(status.name, timestamp)
+            }
+
             val updateData = mapOf(
                 "status" to status.name,
-                "updatedAt" to Timestamp.now()
+                "updatedAt" to timestamp,
+                "statusHistory.${status.name}" to timestamp // Store the timestamp for this status
             )
 
             firestore.collection("orders").document(orderId)
@@ -286,6 +333,17 @@ class FirestoreVendorRepository (
             Log.d(TAG, "=== END updateOrderStatus - ERROR ===")
             Result.failure(e)
         }
+    }
+
+    private fun parseStatusHistory(data: Any?): Map<String, Any> {
+        return (if (data is Map<*, *>) {
+            data.filterKeys { it is String }
+                .mapKeys { it.key as String }
+                .mapValues { it.value }
+                .toMap()
+        } else {
+            emptyMap()
+        }) as Map<String, Any>
     }
 
     // Add detailed logging to the helper methods as well
