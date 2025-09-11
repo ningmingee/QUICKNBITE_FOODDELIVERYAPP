@@ -40,6 +40,8 @@ class CartViewModel : ViewModel() {
         paymentMethod = option
     }
 
+    var deliveryLocation by mutableStateOf("")
+
     // --- Cart item operations ---
     fun addToCart(item: CartItem) {
         val existing = cartItems.find { it.name == item.name }

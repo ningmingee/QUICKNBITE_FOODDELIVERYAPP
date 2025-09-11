@@ -26,7 +26,8 @@ import com.example.quicknbiteapp.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderTrackingScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    deliveryAddress: String
 ) {
     Scaffold(
         topBar = {
@@ -87,7 +88,7 @@ fun OrderTrackingScreen(
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
-                        "77, Lembah Lorong Permai 3",
+                        deliveryAddress,
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyMedium

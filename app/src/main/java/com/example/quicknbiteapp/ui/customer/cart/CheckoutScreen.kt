@@ -28,6 +28,11 @@ import com.example.quicknbiteapp.viewModel.CartViewModel
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import com.example.quicknbiteapp.utils.LocationManager
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,6 +74,21 @@ fun CheckoutScreen(
             }
         }
         slots
+    }
+
+    val context = LocalContext.current
+    val locationManager = remember { LocationManager(context) }
+
+    // Step 1: Fetch GPS location when screen opens
+    LaunchedEffect(Unit) {
+        locationManager.fetchUserLocation()
+    }
+
+    // Step 2: Update deliveryLocation when GPS resolves
+    LaunchedEffect(locationManager.userLocation.value) {
+        locationManager.userLocation.value?.let { loc ->
+            cartViewModel.deliveryLocation = loc.address
+        }
     }
 
     Scaffold(
@@ -288,8 +308,8 @@ fun CheckoutScreen(
                             style = MaterialTheme.typography.titleMedium
                         )
                         OutlinedTextField(
-                            value = location,
-                            onValueChange = { location = it },
+                            value = cartViewModel.deliveryLocation,
+                            onValueChange = { cartViewModel.deliveryLocation = it },
                             placeholder = {
                                 Text(
                                     text = stringResource(R.string.enter_house_address),

@@ -277,11 +277,14 @@ fun QuicknBiteAppScreen() {
                 }
             )
         }
+
         composable("orderTracking") {
             OrderTrackingScreen(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                deliveryAddress = cartViewModel.deliveryLocation
             )
         }
+
         // Profile with navController for Settings
         composable("profile") {
             ProfileScreen(
