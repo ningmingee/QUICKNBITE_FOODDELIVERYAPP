@@ -23,17 +23,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.ui.res.stringResource
 import com.example.quicknbiteapp.viewModel.CartViewModel
+import com.example.quicknbiteapp.viewModel.HomeViewModel
 import com.example.quicknbiteapp.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onNavigate: (String) -> Unit,
-    cartViewModel: CartViewModel
+    cartViewModel: CartViewModel,
+    homeViewModel: HomeViewModel
 ) {
-    var searchQuery by remember { mutableStateOf("") }
+    val searchQuery by remember { mutableStateOf(homeViewModel.searchQuery) }
+    val filteredRestaurants by remember { derivedStateOf { homeViewModel.filteredRestaurants } }
     val scrollState = rememberScrollState()
 
     Scaffold(
@@ -79,8 +83,8 @@ fun HomeScreen(
             ) {
                 // Search
                 OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
+                    value = homeViewModel.searchQuery,
+                    onValueChange = { homeViewModel.updateSearchQuery(it) },
                     placeholder = {
                         Text(
                             text = stringResource(R.string.search_food_restaurants),
@@ -95,6 +99,16 @@ fun HomeScreen(
                             contentDescription = "Search Icon",
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                    },
+                    trailingIcon = {
+                        if (homeViewModel.searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { homeViewModel.updateSearchQuery("") }) {
+                                Icon(
+                                    imageVector = Icons.Default.Clear,
+                                    contentDescription = "Clear Search"
+                                )
+                            }
+                        }
                     },
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -137,26 +151,29 @@ fun HomeScreen(
 
                 // Recommend
                 Text(
-                    stringResource(R.string.recommended),
+                    stringResource(R.string.restaurant),
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
                     style = MaterialTheme.typography.titleMedium
                 )
                 Spacer(Modifier.height(8.dp))
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    item {
-                        RecommendItem(
-                            title = "FatBurger",
-                            subtitle = "Jalan Burma",
-                            imageRes = R.drawable.fatburger_recommend
-                        ) { onNavigate("fatburger") }
-                    }
-                    item {
-                        RecommendItem(
-                            title = "Layer's Bakeshop",
-                            subtitle = "Cafe Town",
-                            imageRes = R.drawable.dessert
-                        ) { onNavigate("layers_bakeshop") }
+
+                if (filteredRestaurants.isEmpty()) {
+                    Text(
+                        text = "No restaurants found",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                } else {
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        items(filteredRestaurants.size) { index ->
+                            val restaurant = filteredRestaurants[index]
+                            RestaurantItem(
+                                title = restaurant.name,
+                                subtitle = restaurant.address,
+                                imageRes = restaurant.imageRes
+                            ) { onNavigate(restaurant.id) }
+                        }
                     }
                 }
             }
@@ -192,7 +209,7 @@ fun CategoryItem(name: String, logo: Int, onClick: () -> Unit) {
 }
 
 @Composable
-fun RecommendItem(title: String, subtitle: String, imageRes: Int, onClick: () -> Unit) {
+fun RestaurantItem(title: String, subtitle: String, imageRes: Int, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .width(160.dp)

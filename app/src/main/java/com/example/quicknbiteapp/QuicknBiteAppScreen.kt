@@ -52,6 +52,7 @@ import com.example.quicknbiteapp.viewModel.CartViewModel
 import com.example.quicknbiteapp.viewModel.ChatViewModel
 import com.example.quicknbiteapp.viewModel.ProfileViewModel
 import com.example.quicknbiteapp.viewModel.VendorViewModel
+import com.example.quicknbiteapp.viewModel.HomeViewModel
 
 @Composable
 fun QuicknBiteAppScreen() {
@@ -61,6 +62,7 @@ fun QuicknBiteAppScreen() {
     val cartViewModel: CartViewModel = viewModel()
     val chatViewModel: ChatViewModel = viewModel()
     val profileViewModel: ProfileViewModel = viewModel { ProfileViewModel(authViewModel) }
+    val homeViewModel: HomeViewModel = viewModel()
 
 
     NavHost(
@@ -185,7 +187,8 @@ fun QuicknBiteAppScreen() {
                 navController = navController,
                 cartViewModel = cartViewModel,
                 chatViewModel = chatViewModel,
-                profileViewModel = profileViewModel
+                profileViewModel = profileViewModel,
+                homeViewModel = homeViewModel
             )
         }
 

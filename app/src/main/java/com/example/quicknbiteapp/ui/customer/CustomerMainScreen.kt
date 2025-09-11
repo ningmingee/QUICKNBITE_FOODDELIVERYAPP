@@ -23,6 +23,8 @@ import com.example.quicknbiteapp.ui.customer.profile.ProfileScreen
 import com.example.quicknbiteapp.viewModel.CartViewModel
 import com.example.quicknbiteapp.viewModel.ChatViewModel
 import com.example.quicknbiteapp.viewModel.ProfileViewModel
+import com.example.quicknbiteapp.viewModel.HomeViewModel
+
 
 sealed class CustomerBottomNavItem(
     val route: String,
@@ -42,7 +44,8 @@ fun CustomerMainScreen(
     navController: NavHostController,
     cartViewModel: CartViewModel = viewModel(),
     chatViewModel: ChatViewModel = viewModel(),
-    profileViewModel: ProfileViewModel = viewModel()
+    profileViewModel: ProfileViewModel = viewModel(),
+    homeViewModel: HomeViewModel = viewModel()
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
 
@@ -67,7 +70,8 @@ fun CustomerMainScreen(
             when (selectedTab) {
                 0 -> HomeScreen(
                     onNavigate = { route -> navController.navigate(route) },
-                    cartViewModel = cartViewModel
+                    cartViewModel = cartViewModel,
+                    homeViewModel = homeViewModel
                 )
                 1 -> ActivityScreen(cartViewModel = cartViewModel)
                 2 -> GameScreen(
