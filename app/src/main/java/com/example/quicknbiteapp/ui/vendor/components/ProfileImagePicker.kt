@@ -43,7 +43,7 @@ import com.example.quicknbiteapp.utils.rememberImagePickerLauncher
 
 @Composable
 fun ProfileImagePicker(
-    imageUrl: String,
+    imageUri: Uri?,
     onImageSelected: (Uri) -> Unit,
     modifier: Modifier = Modifier,
     showEditIcon: Boolean = true,
@@ -65,9 +65,9 @@ fun ProfileImagePicker(
                 modifier = Modifier.size(60.dp),
                 color = MaterialTheme.colorScheme.primary
             )
-        } else if (imageUrl.isNotEmpty()) {
+        } else if (imageUri != null) {
             Image(
-                painter = rememberAsyncImagePainter(imageUrl),
+                painter = rememberAsyncImagePainter(imageUri),
                 contentDescription = "Profile Image",
                 modifier = Modifier
                     .size(120.dp)

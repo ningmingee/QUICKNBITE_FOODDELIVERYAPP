@@ -10,7 +10,6 @@ import com.example.quicknbiteapp.data.model.Review
 import com.example.quicknbiteapp.data.model.ReviewStats
 import com.example.quicknbiteapp.data.model.User
 import com.example.quicknbiteapp.repository.FirestoreVendorRepository
-import com.example.quicknbiteapp.repository.StorageRepository
 import com.example.quicknbiteapp.repository.VendorRepository
 import com.example.quicknbiteapp.repository.VendorSettingsRepository
 import com.example.quicknbiteapp.ui.state.VendorUiState
@@ -46,9 +45,9 @@ class VendorViewModel : ViewModel() {
 
     private val _vendorSettings = MutableStateFlow<User?>(null)
     val vendorSettings: StateFlow<User?> = _vendorSettings.asStateFlow()
-    private val storageRepository = StorageRepository()
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
 
     init {
         Log.d(TAG, "ViewModel created")
@@ -321,56 +320,15 @@ class VendorViewModel : ViewModel() {
         }
     }
 
-    fun uploadProfileImage(imageUri: Uri) {
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                val vendorId = getCurrentVendorId()
-                val imageUrl = storageRepository.uploadProfileImage(vendorId, imageUri)
+    private val _profileImageUri = MutableStateFlow<Uri?>(null)
+    val profileImageUri: StateFlow<Uri?> = _profileImageUri.asStateFlow()
 
-                // Update user document with new profile image URL
-                val updates = mapOf(
-                    "profileImageUrl" to imageUrl,
-                    "updatedAt" to Timestamp.now()
-                )
-
-                val success = settingsRepository.updateVendorSettings(vendorId, updates)
-                if (success) {
-                    // Update local state
-                    _vendorSettings.value = _vendorSettings.value?.copy(profileImageUrl = imageUrl)
-                    loadVendorSettings() // Reload to ensure consistency
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error uploading profile image: ${e.message}")
-            }
-        }
+    fun setProfileImage(uri: Uri) {
+        _profileImageUri.value = uri
     }
 
-    fun removeProfileImage() {
-        viewModelScope.launch {
-            try {
-                val vendorId = getCurrentVendorId()
-                val currentImageUrl = _vendorSettings.value?.profileImageUrl ?: ""
-
-                if (currentImageUrl.isNotEmpty()) {
-                    storageRepository.deleteProfileImage(currentImageUrl)
-                }
-
-                // Remove profile image URL from user document
-                val updates = mapOf(
-                    "profileImageUrl" to "",
-                    "updatedAt" to Timestamp.now()
-                )
-
-                val success = settingsRepository.updateVendorSettings(vendorId, updates)
-                if (success) {
-                    _vendorSettings.value = _vendorSettings.value?.copy(profileImageUrl = "")
-                    loadVendorSettings()
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error removing profile image: ${e.message}")
-            }
-        }
+    fun clearProfileImage() {
+        _profileImageUri.value = null
     }
 
     fun updateBusinessInfo(businessName: String, address: String, operatingHours: String) {
@@ -417,7 +375,7 @@ class VendorViewModel : ViewModel() {
                 if (success) {
                     _vendorSettings.value = _vendorSettings.value?.copy(
                         pushNotifications = pushEnabled,
-                        emailNotifications = emailEnabled
+                        emailNotifications = emailEnabled,
                     )
                     loadVendorSettings()
                 }

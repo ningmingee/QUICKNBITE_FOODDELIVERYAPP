@@ -43,6 +43,7 @@ fun EditProfileScreen(
 ) {
     val vendorSettings by vendorViewModel.vendorSettings.collectAsState()
     val currentUser by authViewModel.currentUser.collectAsState()
+    val profileImageUri by vendorViewModel.profileImageUri.collectAsState()
 
     var businessName by remember { mutableStateOf(vendorSettings?.businessName ?: "") }
     var email by remember { mutableStateOf(currentUser?.email ?: "") }
@@ -75,15 +76,15 @@ fun EditProfileScreen(
             )
 
             ProfileImagePicker(
-                imageUrl = vendorSettings?.profileImageUrl ?: "",
+                imageUri = profileImageUri,
                 onImageSelected = { uri ->
-                    vendorViewModel.uploadProfileImage(uri)
+                    vendorViewModel.setProfileImage(uri)
                 },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
 
             Button(
-                onClick = { vendorViewModel.removeProfileImage() },
+                onClick = { vendorViewModel.clearProfileImage() },
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.error

@@ -12,7 +12,7 @@ data class User(
     val userType: String = "customer", // "customer" or "vendor"
     val pushNotifications: Boolean = true,
     val emailNotifications: Boolean = true,
-    val profileImageUrl: String = "",
     val phoneNumber: String? = null,
-    val createdAt: Timestamp = Timestamp.now()
+    val createdAt: Timestamp = Timestamp.now(),
+    val profileImageUri: String
 )

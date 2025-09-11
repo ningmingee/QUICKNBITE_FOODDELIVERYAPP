@@ -82,6 +82,7 @@ fun VendorSettingsScreen(
     val vendorSettings by vendorViewModel.vendorSettings.collectAsState()
     var showSignOutDialog by remember { mutableStateOf(false) }
     val isLoading by vendorViewModel.isLoading.collectAsState()
+    val profileImageUri by vendorViewModel.profileImageUri.collectAsState()
 
     // Load settings when screen appears
     LaunchedEffect(Unit) {
@@ -118,10 +119,11 @@ fun VendorSettingsScreen(
             ProfileHeaderSection(
                 businessName = vendorSettings?.businessName ?: "Business Name",
                 email = currentUser?.email ?: "No email",
-                profileImageUrl = vendorSettings?.profileImageUrl ?: "",
+                profileImageUri = profileImageUri,
                 onImageSelected = { uri ->
-                    vendorViewModel.uploadProfileImage(uri)
+                    vendorViewModel.setProfileImage(uri)
                 },
+                isLoading = false,
                 navController = navController
             )
 
@@ -283,7 +285,7 @@ fun VendorSettingsScreen(
 fun ProfileHeaderSection(
     businessName: String,
     email: String,
-    profileImageUrl: String = "",
+    profileImageUri: Uri?,
     onImageSelected: (Uri) -> Unit = {},
     isLoading: Boolean = false,
     navController: NavHostController? = null,
@@ -305,10 +307,10 @@ fun ProfileHeaderSection(
         ) {
             // Profile Avatar
             ProfileImagePicker(
-                imageUrl = profileImageUrl,
+                imageUri = profileImageUri,
                 onImageSelected = onImageSelected,
                 isLoading = isLoading,
-                modifier = Modifier.size(120.dp)
+                modifier = Modifier.size(120.dp),
             )
 
             Spacer(modifier = Modifier.height(16.dp))
