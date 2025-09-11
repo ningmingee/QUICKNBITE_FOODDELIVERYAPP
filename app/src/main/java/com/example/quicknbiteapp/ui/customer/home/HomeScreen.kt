@@ -51,8 +51,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import android.Manifest
 import android.location.Geocoder
+import com.example.quicknbiteapp.utils.LocationManager
+import com.example.quicknbiteapp.utils.UserLocation
 import java.util.Locale
-
 
 
 
@@ -60,66 +61,28 @@ import java.util.Locale
 fun HomeScreen(
     onNavigate: (String) -> Unit,
     cartViewModel: CartViewModel,
-    homeViewModel: HomeViewModel
+    homeViewModel: HomeViewModel,
+    locationManager: LocationManager
 ) {
-    val scrollState = rememberScrollState()
-
-    val context = LocalContext.current
-
-    // Location permission
     val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 
-    // Launch permission request if not granted
+    // Request permission on launch
     LaunchedEffect(Unit) {
-        when (val status = locationPermissionState.status) {
-            is PermissionStatus.Granted -> {
-                // Permission already granted, do nothing or proceed
-            }
-            is PermissionStatus.Denied -> {
-                // Request permission
-                locationPermissionState.launchPermissionRequest()
-            }
+        if (locationPermissionState.status != PermissionStatus.Granted) {
+            locationPermissionState.launchPermissionRequest()
+        } else {
+            locationManager.fetchUserLocation()
         }
-
     }
 
-    // FusedLocationProviderClient
-    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-    val currentLocation = remember { mutableStateOf<Location?>(null) }
-
-    // Get current location when permission is granted
+    // Observe changes in permission
     LaunchedEffect(locationPermissionState.status) {
         if (locationPermissionState.status is PermissionStatus.Granted) {
-            try {
-                fusedLocationClient.lastLocation
-                    .addOnSuccessListener { location: Location? ->
-                        currentLocation.value = location
-                        // No need to update restaurants
-                    }
-                    .addOnFailureListener {
-                        // Handle failure if needed
-                    }
-            } catch (e: SecurityException) {
-                // Permission denied, do nothing
-            }
+            locationManager.fetchUserLocation()
         }
     }
 
-    val locationName = remember { mutableStateOf<String?>(null) }
-
-    LaunchedEffect(currentLocation.value) {
-        currentLocation.value?.let { location ->
-            try {
-                val geocoder = Geocoder(context, Locale.getDefault())
-                val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
-                if (!addresses.isNullOrEmpty()) {
-                    locationName.value = addresses[0].getAddressLine(0) // full address
-                }
-            } catch (e: Exception) {
-                locationName.value = "Unknown location"
-            }
-        }
-    }
+    val userLocation by locationManager.userLocation
 
 
     val searchQuery by remember { mutableStateOf(homeViewModel.searchQuery) }
@@ -179,12 +142,11 @@ fun HomeScreen(
         ) {
             // Address
             item {
-                locationName.value?.let { name ->
+                userLocation?.let { location ->
                     Text(
-                        text = "Your location: $name",
+                        text = "Your location: ${userLocation?.address ?: "Unknown"}",
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
                 }
