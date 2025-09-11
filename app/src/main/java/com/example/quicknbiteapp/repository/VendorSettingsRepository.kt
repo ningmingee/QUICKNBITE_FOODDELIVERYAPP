@@ -1,8 +1,12 @@
 package com.example.quicknbiteapp.repository
 
+import android.content.ContentValues.TAG
+import android.net.Uri
+import android.util.Log
 import com.example.quicknbiteapp.data.model.User
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 
 class VendorSettingsRepository (
@@ -14,6 +18,33 @@ class VendorSettingsRepository (
             document.toObject(User::class.java)
         } catch (e: Exception) {
             null
+        }
+    }
+
+    suspend fun setProfileImage(vendorId: String, imageUri: Uri): String? {
+        return try {
+            val storageRef = FirebaseStorage.getInstance().reference
+            val imageRef = storageRef.child("vendor_profiles/$vendorId/${System.currentTimeMillis()}.jpg")
+
+            val uploadTask = imageRef.putFile(imageUri).await()
+            val downloadUrl = imageRef.downloadUrl.await()
+            downloadUrl.toString()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error uploading image: ${e.message}")
+            null
+        }
+    }
+
+    suspend fun updateProfileImage(vendorId: String, imageUrl: String): Boolean {
+        return try {
+            FirebaseFirestore.getInstance().collection("vendors")
+                .document(vendorId)
+                .update("profileImageUrl", imageUrl)
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating profile image: ${e.message}")
+            false
         }
     }
 
@@ -41,11 +72,21 @@ class VendorSettingsRepository (
     }
 
     suspend fun updateAccountInfo(userId: String, displayName: String, phoneNumber: String): Boolean {
-        val updates = mapOf(
-            "displayName" to displayName,
-            "phoneNumber" to phoneNumber
-        )
-        return updateVendorSettings(userId, updates)
+        return try {
+            val updates = mapOf(
+                "businessName" to displayName,
+                "phoneNumber" to phoneNumber
+            )
+
+            FirebaseFirestore.getInstance().collection("vendors")
+                .document(userId)
+                .update(updates)
+                .await()
+
+            true
+        } catch (e: Exception) {
+            false
+        }
     }
 
     suspend fun updateNotificationSettings(userId: String, pushEnabled: Boolean, emailEnabled: Boolean): Boolean {

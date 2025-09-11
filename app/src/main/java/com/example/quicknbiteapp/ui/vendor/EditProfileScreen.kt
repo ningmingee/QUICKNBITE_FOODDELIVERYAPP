@@ -20,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +49,13 @@ fun EditProfileScreen(
     var businessName by remember { mutableStateOf(vendorSettings?.businessName ?: "") }
     var email by remember { mutableStateOf(currentUser?.email ?: "") }
     var phoneNumber by remember { mutableStateOf(vendorSettings?.phoneNumber ?: "") }
+
+    LaunchedEffect(vendorSettings) {
+        vendorSettings?.let {
+            businessName = it.businessName ?: ""
+            phoneNumber = it.phoneNumber ?: ""
+        }
+    }
 
     Scaffold(
         topBar = {
