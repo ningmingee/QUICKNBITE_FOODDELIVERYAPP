@@ -232,6 +232,7 @@
     <string name="fat_burger_banner">Fat Burger Banner</string>
     <string name="layers_bakeshop_banner">Layer\'s Bakeshop Banner</string>
     <string name="empty_cart">Empty Cart</string>
+    <string name="no_restaurant">No restaurants found</string>
 
     <string name="payment_method">Payment Method</string>
     <string name="cash">Cash</string>

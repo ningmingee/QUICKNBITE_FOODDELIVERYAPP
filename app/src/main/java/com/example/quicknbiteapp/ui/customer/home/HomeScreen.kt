@@ -4,7 +4,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
@@ -46,6 +48,9 @@ fun HomeScreen(
                 title = {
                     Text(
                         stringResource(R.string.app_name),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 22.sp,
+                        color = Color.Black,
                         style = MaterialTheme.typography.titleLarge
                     )
                 },
@@ -57,31 +62,36 @@ fun HomeScreen(
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFFC1E8FB),
+                    titleContentColor = Color.White,
+                    actionIconContentColor = Color.White
+                )
             )
         }
     ) { padding ->
-        Column(
+        LazyColumn(
+            contentPadding = padding,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
-                .padding(padding)
+                .background(MaterialTheme.colorScheme.background)
+                .padding(horizontal = 16.dp)
         ) {
-            // ✅ Address text below top bar
-            Text(
-                text = "77 Lorong Lembah Permai 3\n11200 Tanjung Bungah, Pulau Pinang",
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                style = MaterialTheme.typography.bodySmall
-            )
+            // Address (fixed under TopAppBar but part of scrollable content)
+            item {
+                Text(
+                    text = "77 Lorong Lembah Permai 3\n11200 Tanjung Bungah, Pulau Pinang",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
 
-            Column(
-                modifier = Modifier
-                    .verticalScroll(scrollState)
-                    .padding(horizontal = 16.dp)
-            ) {
-                // Search
+            // Search bar
+            item {
                 OutlinedTextField(
                     value = homeViewModel.searchQuery,
                     onValueChange = { homeViewModel.updateSearchQuery(it) },
@@ -111,81 +121,90 @@ fun HomeScreen(
                         }
                     },
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent
                     )
                 )
+            }
 
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    text = stringResource(R.string.good_morning),
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.headlineSmall
-                )
-                Text(
-                    text = stringResource(R.string.rise_and_shine),
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                Spacer(Modifier.height(16.dp))
-
-                // Categories
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    CategoryItem("Offers", R.drawable.offer) { onNavigate("offers") }
-                    CategoryItem("Drinks", R.drawable.drink) { onNavigate("drinks") }
-                    CategoryItem("Food", R.drawable.food) { onNavigate("food") }
-                    CategoryItem("Dessert", R.drawable.desserts) { onNavigate("dessert") }
-                    CategoryItem("MealPlans", R.drawable.mealplans) { onNavigate("mealplans") }
+            // Greeting
+            item {
+                Column {
+                    Text(
+                        text = stringResource(R.string.good_morning),
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                    Text(
+                        text = stringResource(R.string.rise_and_shine),
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
+            }
 
-                Spacer(Modifier.height(20.dp))
+            // Categories (horizontally scrollable)
+            item {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    item {
+                        CategoryItem("Offers", R.drawable.offer) { onNavigate("offers") }
+                    }
+                    item {
+                        CategoryItem("Drinks", R.drawable.drink) { onNavigate("drinks") }
+                    }
+                    item {
+                        CategoryItem("Food", R.drawable.food) { onNavigate("food") }
+                    }
+                    item {
+                        CategoryItem("Dessert", R.drawable.desserts) { onNavigate("dessert") }
+                    }
+                    item {
+                        CategoryItem("MealPlans", R.drawable.mealplans) { onNavigate("mealplans") }
+                    }
+                }
+            }
 
-                // Recommend
+            // Restaurants title
+            item {
                 Text(
                     stringResource(R.string.restaurant),
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
                     style = MaterialTheme.typography.titleMedium
                 )
-                Spacer(Modifier.height(8.dp))
+            }
 
-                if (filteredRestaurants.isEmpty()) {
+            // Restaurant list (vertical)
+            if (filteredRestaurants.isEmpty()) {
+                item {
                     Text(
-                        text = "No restaurants found",
+                        stringResource(R.string.no_restaurant),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(8.dp)
                     )
-                } else {
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(filteredRestaurants.size) { index ->
-                            val restaurant = filteredRestaurants[index]
-                            RestaurantItem(
-                                title = restaurant.name,
-                                subtitle = restaurant.address,
-                                imageRes = restaurant.imageRes,
-                                onClick = if (restaurant.hasMenu) {
-                                    { onNavigate(restaurant.id) }
-                                } else {
-                                    null
-                                }
-                            )
-                        }
-                    }
+                }
+            } else {
+                items(filteredRestaurants) { restaurant ->
+                    RestaurantItem(
+                        title = restaurant.name,
+                        subtitle = restaurant.address,
+                        imageRes = restaurant.imageRes,
+                        onClick = if (restaurant.hasMenu) {
+                            { onNavigate(restaurant.id) }
+                        } else null
+                    )
                 }
             }
         }
     }
 }
-
 
 @Composable
 fun CategoryItem(name: String, logo: Int, onClick: () -> Unit) {
@@ -214,10 +233,13 @@ fun CategoryItem(name: String, logo: Int, onClick: () -> Unit) {
 }
 
 @Composable
-fun RestaurantItem(title: String, subtitle: String, imageRes: Int, onClick: (() -> Unit)? = null ) {
+fun RestaurantItem(title: String,
+                   subtitle: String,
+                   imageRes: Int,
+                   onClick: (() -> Unit)? = null ) {
     Card(
         modifier = Modifier
-            .width(160.dp)
+            .fillMaxWidth()
             .then(
                 if (onClick != null) Modifier.clickable { onClick() }
                 else Modifier
@@ -233,7 +255,7 @@ fun RestaurantItem(title: String, subtitle: String, imageRes: Int, onClick: (() 
                 contentDescription = title,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp),
+                    .height(180.dp),
                 contentScale = ContentScale.Crop
             )
             Column(modifier = Modifier.padding(8.dp)) {
