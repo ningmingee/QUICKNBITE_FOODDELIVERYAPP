@@ -5,5 +5,7 @@ data class Restaurant(
     val name: String,
     val address: String,
     val imageRes: Int,
-    val hasMenu: Boolean = true
+    val hasMenu: Boolean = true,
+    val lat: Double = 0.0,
+    val lng: Double = 0.0
 )

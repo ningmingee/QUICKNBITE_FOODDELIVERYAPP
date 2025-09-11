@@ -129,4 +129,12 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("androidx.activity:activity-compose:1.8.0")
     implementation("androidx.compose.material3:material3:1.1.2")
+
+    // GPS location
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation("com.google.accompanist:accompanist-permissions:0.30.1")
+    implementation("com.google.accompanist:accompanist-permissions:0.32.0")
+    implementation("com.google.accompanist:accompanist-permissions:0.31.5-beta")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
 }

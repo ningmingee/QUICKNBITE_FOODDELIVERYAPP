@@ -8,7 +8,7 @@ data class MenuItem(
     val name: String = "",
     val description: String = "",
     val price: Double = 0.0,
-    val category: String = "", // e.g., "Burger", "Drink"
+    val category: String = "",
     val isAvailable: Boolean = true,
     val createdAt: Timestamp = Timestamp.now(),
     val updatedAt: Timestamp = Timestamp.now()

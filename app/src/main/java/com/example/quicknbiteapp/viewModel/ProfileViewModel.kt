@@ -30,7 +30,7 @@ class ProfileViewModel(
 
     val profileOptions = listOf(
         ProfileItem(Icons.Default.Person, "Edit Profile") { editProfile() },
-        ProfileItem(Icons.Default.ShoppingCart, "My Orders History") { viewOrders() },
+        ProfileItem(Icons.Default.ShoppingCart, "My Orders") { viewOrders() },
         ProfileItem(Icons.Default.Settings, "Settings") { openSettings() },
         ProfileItem(Icons.Default.Help, "Help / Support") { openHelp() },
         ProfileItem(Icons.Default.Logout, "Logout") { logout() }
