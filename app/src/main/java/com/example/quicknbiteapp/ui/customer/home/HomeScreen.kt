@@ -35,27 +35,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
-
-// Android location
-import android.location.Location
-import com.google.android.gms.location.LocationServices
-
-// Accompanist Permissions (if still using it for runtime permission)
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.PermissionStatus
-
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import android.Manifest
-import android.location.Geocoder
 import com.example.quicknbiteapp.utils.LocationManager
-import com.example.quicknbiteapp.utils.UserLocation
-import java.util.Locale
-
-
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)@Composable
 fun HomeScreen(

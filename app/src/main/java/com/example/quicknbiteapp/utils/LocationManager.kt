@@ -2,7 +2,6 @@ package com.example.quicknbiteapp.utils
 
 import android.content.Context
 import android.location.Geocoder
-import android.location.Location
 import androidx.compose.runtime.mutableStateOf
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
