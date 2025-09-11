@@ -171,8 +171,13 @@ fun HomeScreen(
                             RestaurantItem(
                                 title = restaurant.name,
                                 subtitle = restaurant.address,
-                                imageRes = restaurant.imageRes
-                            ) { onNavigate(restaurant.id) }
+                                imageRes = restaurant.imageRes,
+                                onClick = if (restaurant.hasMenu) {
+                                    { onNavigate(restaurant.id) }
+                                } else {
+                                    null
+                                }
+                            )
                         }
                     }
                 }
@@ -209,11 +214,14 @@ fun CategoryItem(name: String, logo: Int, onClick: () -> Unit) {
 }
 
 @Composable
-fun RestaurantItem(title: String, subtitle: String, imageRes: Int, onClick: () -> Unit) {
+fun RestaurantItem(title: String, subtitle: String, imageRes: Int, onClick: (() -> Unit)? = null ) {
     Card(
         modifier = Modifier
             .width(160.dp)
-            .clickable { onClick() },
+            .then(
+                if (onClick != null) Modifier.clickable { onClick() }
+                else Modifier
+            ),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
