@@ -69,7 +69,21 @@ fun HomeScreen(
                     actionIconContentColor = Color.White
                 )
             )
-        }
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { onNavigate("orderTracking") },
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.order_tracking),
+                    contentDescription = "Order Tracking",
+                    modifier = Modifier.size(32.dp),
+                    tint = Color.White
+                )
+            }
+        },
+        floatingActionButtonPosition = FabPosition.End
     ) { padding ->
         LazyColumn(
             contentPadding = padding,
@@ -79,7 +93,7 @@ fun HomeScreen(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(horizontal = 16.dp)
         ) {
-            // Address (fixed under TopAppBar but part of scrollable content)
+            // Address
             item {
                 Text(
                     text = "77 Lorong Lembah Permai 3\n11200 Tanjung Bungah, Pulau Pinang",
@@ -148,7 +162,7 @@ fun HomeScreen(
                 }
             }
 
-            // Categories (horizontally scrollable)
+            // Categories
             item {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     item {
@@ -179,7 +193,7 @@ fun HomeScreen(
                 )
             }
 
-            // Restaurant list (vertical)
+            // Restaurants list
             if (filteredRestaurants.isEmpty()) {
                 item {
                     Text(
