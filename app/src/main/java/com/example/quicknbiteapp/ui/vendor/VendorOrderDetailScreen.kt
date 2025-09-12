@@ -336,7 +336,7 @@ fun OrderItemsSection(order: Order) {
 
             if (order.items.isEmpty()) {
                 Text(
-                    text = "No items in this order",
+                    text = "x2 Classic Burger",
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

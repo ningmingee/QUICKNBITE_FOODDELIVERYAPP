@@ -17,6 +17,7 @@ class VendorSettingsRepository (
             val document = firestore.collection("users").document(userId).get().await()
             document.toObject(User::class.java)
         } catch (e: Exception) {
+            Log.e(TAG, "Error getting vendor settings: ${e.message}")
             null
         }
     }
@@ -50,7 +51,7 @@ class VendorSettingsRepository (
 
     suspend fun updateVendorSettings(userId: String, updates: Map<String, Any>): Boolean {
         return try {
-            firestore.collection("users").document(userId).update(updates).await()
+            firestore.collection("vendors").document(userId).update(updates).await()
             true
         } catch (e: Exception) {
             false
@@ -63,26 +64,28 @@ class VendorSettingsRepository (
         address: String,
         operatingHours: String
     ): Boolean {
-        val updates = mapOf(
-            "businessName" to businessName,
-            "businessAddress" to address,
-            "operatingHours" to operatingHours
-        )
-        return updateVendorSettings(userId, updates)
+        return try {
+            val updates = mapOf(
+                "businessName" to businessName,
+                "businessAddress" to address,
+                "operatingHours" to operatingHours
+            )
+            firestore.collection("users").document(userId).update(updates).await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating business info: ${e.message}")
+            false
+        }
     }
 
     suspend fun updateAccountInfo(userId: String, displayName: String, phoneNumber: String): Boolean {
         return try {
             val updates = mapOf(
-                "businessName" to displayName,
+                "displayName" to displayName,
                 "phoneNumber" to phoneNumber
             )
 
-            FirebaseFirestore.getInstance().collection("vendors")
-                .document(userId)
-                .update(updates)
-                .await()
-
+            firestore.collection("users").document(userId).update(updates).await()
             true
         } catch (e: Exception) {
             false

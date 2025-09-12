@@ -8,6 +8,5 @@ data class OrderItem(
     val specialInstructions: String? = null,
     val category: String? = null
 ) {
-    fun getTotalPrice(): Double = pricePerItem * quantity
-    fun getItemName(): String = name
+    fun getItemName(): String = name.ifEmpty { "Unknown Item" }
 }

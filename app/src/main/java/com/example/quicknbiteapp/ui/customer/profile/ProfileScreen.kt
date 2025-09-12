@@ -1,12 +1,10 @@
 package com.example.quicknbiteapp.ui.customer.profile
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -16,19 +14,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import coil.compose.AsyncImage
 import com.example.quicknbiteapp.data.model.ProfileItem
 import com.example.quicknbiteapp.viewModel.ProfileViewModel
 import com.example.quicknbiteapp.ui.state.LogoutState
 import com.example.quicknbiteapp.R
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,16 +36,11 @@ fun ProfileScreen(
     val logoutState by profileViewModel.logoutState.collectAsState()
     val showLogoutDialog by profileViewModel.showLogoutDialog.collectAsState()
 
+    // Handle logout state changes - FIXED: Moved to top level
     LaunchedEffect(logoutState) {
-        when (logoutState) {
-            is LogoutState.Success -> {
-                profileViewModel.resetLogoutState()
-                onLogout()
-            }
-            is LogoutState.Error -> {
-                profileViewModel.resetLogoutState()
-            }
-            else -> {}
+        if (logoutState is LogoutState.Success) {
+            profileViewModel.resetLogoutState()
+            onLogout()
         }
     }
 
@@ -68,101 +57,90 @@ fun ProfileScreen(
             )
         }
     ) { padding ->
-        Box(modifier = Modifier.fillMaxSize()) {
-            if (isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            }
-
-            if (logoutState is LogoutState.Loading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.3f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                }
-            }
-
-            Column(
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Simple Profile Icon (No image upload needed)
+            Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .size(100.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
             ) {
-                // Simple Profile Icon (No image upload needed)
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "Profile",
-                        modifier = Modifier.size(50.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                Spacer(Modifier.height(16.dp))
-
-                Text(
-                    customer?.getDisplayName() ?: "Loading...",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Profile",
+                    modifier = Modifier.size(50.dp),
+                    tint = MaterialTheme.colorScheme.primary
                 )
+            }
 
+            Spacer(Modifier.height(16.dp))
+
+            Text(
+                customer?.getDisplayName() ?: "Loading...",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Text(
+                customer?.email ?: "",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            // Display loyalty points if available
+            customer?.loyaltyPoints?.takeIf { it > 0 }?.let { points ->
+                Spacer(Modifier.height(8.dp))
                 Text(
-                    customer?.email ?: "",
+                    "$points Loyalty Points",
                     fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                // Display loyalty points if available
-                customer?.loyaltyPoints?.takeIf { it > 0 }?.let { points ->
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        "$points Loyalty Points",
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-
-                Spacer(Modifier.height(24.dp))
-
-                val options = profileViewModel.profileOptions.map { item ->
-                    when (item.title) {
-                        "Settings" -> item.copy(action = { navController.navigate("settings") })
-                        "Logout" -> item.copy(action = { profileViewModel.showLogoutConfirmation() })
-                        else -> item
-                    }
-                }
-
-                options.forEach { ProfileOption(it) }
-            }
-
-            if (showLogoutDialog) {
-                AlertDialog(
-                    onDismissRequest = { profileViewModel.dismissLogoutConfirmation() },
-                    title = { Text("Logout") },
-                    text = { Text("Are you sure you want to logout?") },
-                    confirmButton = {
-                        Button(onClick = { profileViewModel.logout() }) {
-                            Text("Logout")
-                        }
-                    },
-                    dismissButton = {
-                        OutlinedButton(onClick = { profileViewModel.dismissLogoutConfirmation() }) {
-                            Text("Cancel")
-                        }
-                    }
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium
                 )
             }
+
+            Spacer(Modifier.height(24.dp))
+
+            val options = profileViewModel.profileOptions.map { item ->
+                when (item.title) {
+                    "Settings" -> item.copy(action = { navController.navigate("settings") })
+                    "Logout" -> item.copy(action = { profileViewModel.showLogoutConfirmation() })
+                    else -> item
+                }
+            }
+
+            options.forEach { ProfileOption(it) }
+        }
+
+        // Logout Confirmation Dialog - FIXED: Better placement
+        if (showLogoutDialog) {
+            AlertDialog(
+                onDismissRequest = { profileViewModel.dismissLogoutConfirmation() },
+                title = { Text("Logout") },
+                text = { Text("Are you sure you want to logout?") },
+                confirmButton = {
+                    Button(
+                        onClick = { profileViewModel.logout() },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("Logout")
+                    }
+                },
+                dismissButton = {
+                    OutlinedButton(onClick = { profileViewModel.dismissLogoutConfirmation() }) {
+                        Text("Cancel")
+                    }
+                }
+            )
         }
     }
 }

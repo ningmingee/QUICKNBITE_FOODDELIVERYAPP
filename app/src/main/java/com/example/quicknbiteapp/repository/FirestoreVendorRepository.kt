@@ -130,9 +130,7 @@ class FirestoreVendorRepository (
     }
     private fun parseDouble(value: Any?): Double {
         return when (value) {
-            is Double -> value
-            is Long -> value.toDouble()
-            is Int -> value.toDouble()
+            is Number -> value.toDouble() // Handles Double, Long, Int, etc.
             is String -> value.toDoubleOrNull() ?: 0.0
             else -> 0.0
         }
@@ -140,9 +138,7 @@ class FirestoreVendorRepository (
 
     private fun parseInt(value: Any?): Int {
         return when (value) {
-            is Int -> value
-            is Long -> value.toInt()
-            is Double -> value.toInt()
+            is Number -> value.toInt()
             is String -> value.toIntOrNull() ?: 0
             else -> 0
         }
@@ -170,17 +166,56 @@ class FirestoreVendorRepository (
 
             Log.d(TAG, "Orders query: Found ${snapshot.documents.size} documents.")
 
+            // DEEP DEBUG: Log the complete structure of each order
+            snapshot.documents.forEach { doc ->
+                Log.d(TAG, "=== ORDER ${doc.id} COMPLETE DATA ===")
+                val data = doc.data ?: emptyMap()
+
+                data.forEach { (key, value) ->
+                    when (key) {
+                        "items" -> {
+                            Log.d(TAG, "ITEMS FIELD (type: ${value?.javaClass?.simpleName}):")
+                            if (value is List<*>) {
+                                Log.d(TAG, "Items list size: ${value.size}")
+                                value.forEachIndexed { index, item ->
+                                    Log.d(TAG, "  Item $index: $item")
+                                    Log.d(TAG, "  Item $index type: ${item?.javaClass?.simpleName}")
+
+                                    if (item is Map<*, *>) {
+                                        val itemMap = item as Map<*, *>
+                                        Log.d(TAG, "  Item $index keys: ${itemMap.keys}")
+                                        itemMap.forEach { (itemKey, itemValue) ->
+                                            Log.d(TAG, "    $itemKey: $itemValue (${itemValue?.javaClass?.simpleName})")
+                                        }
+                                    }
+                                }
+                            } else {
+                                Log.d(TAG, "Items is not a list: ${value?.javaClass?.simpleName}")
+                            }
+                        }
+                        else -> Log.d(TAG, "$key: $value (${value?.javaClass?.simpleName})")
+                    }
+                }
+                Log.d(TAG, "=== END ORDER ${doc.id} ===")
+            }
+
             val orders = snapshot.documents.mapNotNull { doc ->
                 try {
                     val data = doc.data ?: emptyMap()
 
-                    // MANUALLY MAP THE FIELDS to handle data type differences
+                    // Parse items with detailed debugging
+                    val itemsData = data["items"]
+                    Log.d(TAG, "🔍 Parsing items for order ${doc.id}: $itemsData")
+
+                    val parsedItems = parseOrderItems(itemsData)
+                    Log.d(TAG, "✅ Parsed ${parsedItems.size} items for order ${doc.id}")
+
                     Order(
                         orderId = doc.id,
                         vendorId = data["vendorId"] as? String ?: "",
                         customerId = data["customerId"] as? String ?: "",
                         customerName = data["customerName"] as? String ?: "Unknown Customer",
-                        items = parseOrderItems(data["items"]),
+                        items = parsedItems,
                         subtotal = parseDouble(data["subtotal"]),
                         deliveryFee = parseDouble(data["deliveryFee"]),
                         serviceFee = parseDouble(data["serviceFee"]),
@@ -198,7 +233,7 @@ class FirestoreVendorRepository (
                         customerPhoneNumber = data["customerPhoneNumber"] as? String
                     )
                 } catch (e: Exception) {
-                    Log.e(TAG, "Error mapping order ${doc.id}: ${e.message}")
+                    Log.e(TAG, "Error mapping order ${doc.id}: ${e.message}", e)
                     null
                 }
             }
@@ -211,29 +246,85 @@ class FirestoreVendorRepository (
         }
     }
 
-    // Add these helper functions to your repository:
-    private fun parseOrderStatus(status: Any?): OrderStatus {
-        return when (status) {
-            is String -> OrderStatus.valueOf(status)
-            is OrderStatus -> status
-            else -> OrderStatus.PENDING
+    private fun parseOrderItems(items: Any?): List<OrderItem> {
+        Log.d(TAG, "🛒 parseOrderItems called with: $items (type: ${items?.javaClass?.simpleName})")
+
+        if (items == null) {
+            Log.w(TAG, "Items is null")
+            return emptyList()
         }
+
+        if (items !is List<*>) {
+            Log.w(TAG, "Items is not a List, it's: ${items.javaClass.simpleName}")
+            return emptyList()
+        }
+
+        if (items.isEmpty()) {
+            Log.w(TAG, "Items list is empty")
+            return emptyList()
+        }
+
+        return items.mapIndexed { index, item ->
+            try {
+                Log.d(TAG, "🔍 Processing item $index: $item")
+
+                if (item !is Map<*, *>) {
+                    Log.w(TAG, "❌ Item $index is not a Map: ${item?.javaClass?.simpleName}")
+                    return@mapIndexed null
+                }
+
+                val itemMap = item as Map<String, Any>
+                Log.d(TAG, "📋 Item $index map: $itemMap")
+                Log.d(TAG, "🔑 Item $index keys: ${itemMap.keys.joinToString()}")
+
+                // Try ALL possible field name variations
+                val menuItemId = itemMap["menuItemId"] as? String ?:
+                itemMap["itemId"] as? String ?:
+                itemMap["productId"] as? String ?:
+                itemMap["id"] as? String ?: ""
+
+                val name = itemMap["name"] as? String ?:
+                itemMap["itemName"] as? String ?:
+                itemMap["productName"] as? String ?:
+                itemMap["title"] as? String ?: "Unknown Item"
+
+                val pricePerItem = parseDouble(
+                    itemMap["pricePerItem"] ?:
+                    itemMap["price"] ?:
+                    itemMap["itemPrice"] ?:
+                    itemMap["unitPrice"] ?:
+                    itemMap["cost"] ?: 0.0
+                )
+
+                val quantity = parseInt(
+                    itemMap["quantity"] ?:
+                    itemMap["qty"] ?:
+                    itemMap["count"] ?: 1
+                )
+
+                val specialInstructions = itemMap["specialInstructions"] as? String ?:
+                itemMap["instructions"] as? String ?:
+                itemMap["notes"] as? String
+
+                val category = itemMap["category"] as? String
+
+                Log.d(TAG, "✅ Parsed item $index: $name x$quantity @ RM$pricePerItem")
+
+                OrderItem(
+                    menuItemId = menuItemId,
+                    name = name,
+                    pricePerItem = pricePerItem,
+                    quantity = quantity,
+                    specialInstructions = specialInstructions,
+                    category = category
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "Error parsing item $index: $item", e)
+                null
+            }
+        }.filterNotNull()
     }
 
-    private fun parseOrderItems(items: Any?): List<OrderItem> {
-        return if (items is List<*>) {
-            items.filterIsInstance<Map<String, Any>>().map { itemData ->
-                OrderItem(
-                    menuItemId = itemData["menuItemId"] as? String ?: "",
-                    name = itemData["name"] as? String ?: "Unknown Item",
-                    pricePerItem = parseDouble(itemData["pricePerItem"]),
-                    quantity = parseInt(itemData["quantity"])
-                )
-            }
-        } else {
-            emptyList()
-        }
-    }
 
     override suspend fun getMenuItems(vendorId: String): Result<List<MenuItem>> {
         return try {
@@ -332,6 +423,24 @@ class FirestoreVendorRepository (
             Log.e(TAG, "Error stack trace: ${e.stackTraceToString()}")
             Log.d(TAG, "=== END updateOrderStatus - ERROR ===")
             Result.failure(e)
+        }
+    }
+
+    private fun parseOrderStatus(status: Any?): OrderStatus {
+        return when (status) {
+            is String -> {
+                try {
+                    OrderStatus.valueOf(status.uppercase())
+                } catch (e: IllegalArgumentException) {
+                    Log.w(TAG, "Unknown order status: $status, defaulting to PENDING")
+                    OrderStatus.PENDING
+                }
+            }
+            is OrderStatus -> status
+            else -> {
+                Log.w(TAG, "Invalid order status type: ${status?.javaClass?.simpleName}, defaulting to PENDING")
+                OrderStatus.PENDING
+            }
         }
     }
 
