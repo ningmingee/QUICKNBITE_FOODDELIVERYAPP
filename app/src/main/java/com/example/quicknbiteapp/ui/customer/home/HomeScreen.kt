@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -30,7 +28,6 @@ import androidx.compose.ui.res.stringResource
 import com.example.quicknbiteapp.viewModel.CartViewModel
 import com.example.quicknbiteapp.viewModel.HomeViewModel
 import com.example.quicknbiteapp.R
-// Compose
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -82,7 +79,7 @@ fun HomeScreen(
                         fontWeight = FontWeight.Bold,
                         fontSize = 22.sp,
                         color = Color.Black,
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.displayLarge
                     )
                 },
                 actions = {
@@ -126,13 +123,12 @@ fun HomeScreen(
         ) {
             // Address
             item {
-                //userLocation?.let { location ->
-                    Text(
-                        text = "Location: ${userLocation?.address ?: "Unknown"}",
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
+                Text(
+                    text = "Location: ${userLocation?.address ?: "Unknown"}",
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
 
             }
 
@@ -183,13 +179,13 @@ fun HomeScreen(
                         fontSize = 25.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.headlineSmall
+                        style = MaterialTheme.typography.displayLarge
                     )
                     Text(
                         text = stringResource(R.string.rise_and_shine),
                         fontSize = 18.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.displayMedium
                     )
                 }
             }
@@ -221,7 +217,7 @@ fun HomeScreen(
                     stringResource(R.string.restaurant),
                     fontWeight = FontWeight.Bold,
                     fontSize = 30.sp,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.displayLarge
                 )
             }
 
@@ -309,13 +305,13 @@ fun RestaurantItem(title: String,
                     title,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.displayMedium
                 )
                 Text(
                     subtitle,
                     fontSize = 18.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodyLarge
                 )
             }
         }

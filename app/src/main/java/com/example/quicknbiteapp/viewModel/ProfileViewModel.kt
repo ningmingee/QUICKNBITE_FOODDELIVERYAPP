@@ -1,6 +1,8 @@
 package com.example.quicknbiteapp.viewModel
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -29,7 +31,6 @@ class ProfileViewModel (
     val showLogoutDialog: StateFlow<Boolean> = _showLogoutDialog
 
     private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     init {
         loadCustomerData()
@@ -44,7 +45,7 @@ class ProfileViewModel (
                     val customerData = customerRepository.getCustomer(customerId)
                     _customer.value = customerData ?: createNewCustomer(customerId, currentUser)
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 // Handle error
             } finally {
                 _isLoading.value = false
@@ -81,8 +82,8 @@ class ProfileViewModel (
         ProfileItem(Icons.Default.Person, "Edit Profile") { editProfile() },
         ProfileItem(Icons.Default.ShoppingCart, "My Orders") { viewOrders() },
         ProfileItem(Icons.Default.Settings, "Settings") { openSettings() },
-        ProfileItem(Icons.Default.Help, "Help / Support") { openHelp() },
-        ProfileItem(Icons.Default.Logout, "Logout") { showLogoutConfirmation() }
+        ProfileItem(Icons.AutoMirrored.Filled.Help, "Help / Support") { openHelp() },
+        ProfileItem(Icons.AutoMirrored.Filled.Logout, "Logout") { showLogoutConfirmation() }
     )
 
     private fun editProfile() { /* TODO: navigate to edit profile */ }

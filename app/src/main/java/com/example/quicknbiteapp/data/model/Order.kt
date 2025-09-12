@@ -35,31 +35,6 @@ data class Order(
         }
     }
 
-    // Helper function to safely get update date
-    fun getUpdateDate(): Date {
-        return when (updatedAt) {
-            is Timestamp -> updatedAt.toDate()
-            is Long -> Date(updatedAt)
-            is Date -> updatedAt
-            else -> Date() // Fallback to current date
-        }
-    }
-
-    // Helper to get status timestamp using OrderStatus enum
-    fun getStatusTimestamp(status: OrderStatus): Date? {
-        return when (val timestamp = statusHistory[status.name]) {
-            is Timestamp -> timestamp.toDate()
-            is Long -> Date(timestamp)
-            is Date -> timestamp
-            else -> null
-        }
-    }
-
-    // Helper to check if status exists in history using OrderStatus enum
-    fun hasStatus(status: OrderStatus): Boolean {
-        return statusHistory.containsKey(status.name)
-    }
-
     // Get all status events in chronological order
     fun getStatusEvents(): List<Pair<OrderStatus, Date>> {
         val events = mutableListOf<Pair<OrderStatus, Date>>()

@@ -32,7 +32,6 @@ fun ProfileScreen(
     onLogout: () -> Unit
 ) {
     val customer by profileViewModel.customer.collectAsState()
-    val isLoading by profileViewModel.isLoading.collectAsState()
     val logoutState by profileViewModel.logoutState.collectAsState()
     val showLogoutDialog by profileViewModel.showLogoutDialog.collectAsState()
 

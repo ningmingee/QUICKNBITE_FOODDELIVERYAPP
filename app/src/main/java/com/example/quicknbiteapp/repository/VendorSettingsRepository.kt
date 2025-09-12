@@ -1,12 +1,9 @@
 package com.example.quicknbiteapp.repository
 
 import android.content.ContentValues.TAG
-import android.net.Uri
 import android.util.Log
 import com.example.quicknbiteapp.data.model.User
-import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 
 class VendorSettingsRepository (
@@ -19,42 +16,6 @@ class VendorSettingsRepository (
         } catch (e: Exception) {
             Log.e(TAG, "Error getting vendor settings: ${e.message}")
             null
-        }
-    }
-
-    suspend fun setProfileImage(vendorId: String, imageUri: Uri): String? {
-        return try {
-            val storageRef = FirebaseStorage.getInstance().reference
-            val imageRef = storageRef.child("vendor_profiles/$vendorId/${System.currentTimeMillis()}.jpg")
-
-            val uploadTask = imageRef.putFile(imageUri).await()
-            val downloadUrl = imageRef.downloadUrl.await()
-            downloadUrl.toString()
-        } catch (e: Exception) {
-            Log.e(TAG, "Error uploading image: ${e.message}")
-            null
-        }
-    }
-
-    suspend fun updateProfileImage(vendorId: String, imageUrl: String): Boolean {
-        return try {
-            FirebaseFirestore.getInstance().collection("vendors")
-                .document(vendorId)
-                .update("profileImageUrl", imageUrl)
-                .await()
-            true
-        } catch (e: Exception) {
-            Log.e(TAG, "Error updating profile image: ${e.message}")
-            false
-        }
-    }
-
-    suspend fun updateVendorSettings(userId: String, updates: Map<String, Any>): Boolean {
-        return try {
-            firestore.collection("vendors").document(userId).update(updates).await()
-            true
-        } catch (e: Exception) {
-            false
         }
     }
 
@@ -87,7 +48,7 @@ class VendorSettingsRepository (
 
             firestore.collection("users").document(userId).update(updates).await()
             true
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
@@ -101,7 +62,7 @@ class VendorSettingsRepository (
             )
             firestore.collection("users").document(userId).update(updates).await()
             true
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }

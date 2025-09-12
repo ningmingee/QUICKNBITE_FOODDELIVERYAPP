@@ -23,15 +23,15 @@ class FirestoreVendorRepository (
         private const val TAG = "FirestoreVendorRepo"
     }
 
-    override suspend fun getVendorData(userId: String): Result<Vendor> {
+    override suspend fun getVendorData(vendorId: String): Result<Vendor> {
         return try {
             Log.d(TAG, "=== START getVendorData ===")
-            Log.d(TAG, "Looking for vendor data for user ID: $userId")
+            Log.d(TAG, "Looking for vendor data for user ID: $vendorId")
 
             // get user document to find the vendorId
-            val userDoc = firestore.collection("users").document(userId).get().await()
+            val userDoc = firestore.collection("users").document(vendorId).get().await()
             if (!userDoc.exists()) {
-                Log.d(TAG, "User document not found at users/$userId")
+                Log.d(TAG, "User document not found at users/$vendorId")
                 return Result.failure(Exception("User not found"))
             }
 
@@ -55,7 +55,7 @@ class FirestoreVendorRepository (
                 // 3. Create Vendor object
                 val vendor = Vendor(
                     id = vendorDoc.id,
-                    userId = userId,
+                    userId = vendorId,
                     vendorId = vendorDoc.id,
                     businessName = vendorData["businessName"] as? String ?: userData["businessName"] as? String ?: "",
                     ownerName = vendorData["ownerName"] as? String ?: "",
@@ -182,7 +182,7 @@ class FirestoreVendorRepository (
                                     Log.d(TAG, "  Item $index type: ${item?.javaClass?.simpleName}")
 
                                     if (item is Map<*, *>) {
-                                        val itemMap = item as Map<*, *>
+                                        val itemMap = item
                                         Log.d(TAG, "  Item $index keys: ${itemMap.keys}")
                                         itemMap.forEach { (itemKey, itemValue) ->
                                             Log.d(TAG, "    $itemKey: $itemValue (${itemValue?.javaClass?.simpleName})")
@@ -205,10 +205,10 @@ class FirestoreVendorRepository (
 
                     // Parse items with detailed debugging
                     val itemsData = data["items"]
-                    Log.d(TAG, "🔍 Parsing items for order ${doc.id}: $itemsData")
+                    Log.d(TAG, "Parsing items for order ${doc.id}: $itemsData")
 
                     val parsedItems = parseOrderItems(itemsData)
-                    Log.d(TAG, "✅ Parsed ${parsedItems.size} items for order ${doc.id}")
+                    Log.d(TAG, "Parsed ${parsedItems.size} items for order ${doc.id}")
 
                     Order(
                         orderId = doc.id,
@@ -247,7 +247,7 @@ class FirestoreVendorRepository (
     }
 
     private fun parseOrderItems(items: Any?): List<OrderItem> {
-        Log.d(TAG, "🛒 parseOrderItems called with: $items (type: ${items?.javaClass?.simpleName})")
+        Log.d(TAG, "parseOrderItems called with: $items (type: ${items?.javaClass?.simpleName})")
 
         if (items == null) {
             Log.w(TAG, "Items is null")
@@ -266,16 +266,16 @@ class FirestoreVendorRepository (
 
         return items.mapIndexed { index, item ->
             try {
-                Log.d(TAG, "🔍 Processing item $index: $item")
+                Log.d(TAG, "Processing item $index: $item")
 
                 if (item !is Map<*, *>) {
-                    Log.w(TAG, "❌ Item $index is not a Map: ${item?.javaClass?.simpleName}")
+                    Log.w(TAG, "Item $index is not a Map: ${item?.javaClass?.simpleName}")
                     return@mapIndexed null
                 }
 
-                val itemMap = item as Map<String, Any>
-                Log.d(TAG, "📋 Item $index map: $itemMap")
-                Log.d(TAG, "🔑 Item $index keys: ${itemMap.keys.joinToString()}")
+                val itemMap = item
+                Log.d(TAG, "Item $index map: $itemMap")
+                Log.d(TAG, "Item $index keys: ${itemMap.keys.joinToString()}")
 
                 // Try ALL possible field name variations
                 val menuItemId = itemMap["menuItemId"] as? String ?:
@@ -308,7 +308,7 @@ class FirestoreVendorRepository (
 
                 val category = itemMap["category"] as? String
 
-                Log.d(TAG, "✅ Parsed item $index: $name x$quantity @ RM$pricePerItem")
+                Log.d(TAG, "Parsed item $index: $name x$quantity @ RM$pricePerItem")
 
                 OrderItem(
                     menuItemId = menuItemId,
@@ -577,31 +577,4 @@ class FirestoreVendorRepository (
         }
     }
 
-    suspend fun getOrdersWithListener(vendorId: String, onUpdate: (List<Order>) -> Unit) {
-        try {
-            Log.d(TAG, "Setting up real-time orders listener for vendorId: $vendorId")
-
-            firestore.collection("orders")
-                .whereEqualTo("vendorId", vendorId)
-                .orderBy("createdAt", Query.Direction.DESCENDING)
-                .addSnapshotListener { snapshot, error ->
-                    if (error != null) {
-                        Log.e(TAG, "Error in orders listener: ${error.message}")
-                        return@addSnapshotListener
-                    }
-
-                    snapshot?.let {
-                        Log.d(TAG, "Real-time orders update: ${it.documents.size} documents")
-                        val orders = it.documents.mapNotNull { doc ->
-                            doc.toObject(Order::class.java)?.copy(orderId = doc.id)
-                        }
-                        Log.d(TAG, "Mapped ${orders.size} orders from real-time update")
-                        onUpdate(orders)
-                    }
-                }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error setting up orders listener: ${e.message}")
-            Log.e(TAG, "Error stack trace: ${e.stackTraceToString()}")
-        }
-    }
 }

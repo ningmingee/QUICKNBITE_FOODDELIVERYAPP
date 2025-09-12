@@ -1,4 +1,3 @@
-// Create CustomerRepository.kt
 package com.example.quicknbiteapp.repository
 
 import com.example.quicknbiteapp.data.model.Customer
@@ -12,7 +11,7 @@ class CustomerRepository(private val firestore: FirebaseFirestore) {
         return try {
             val document = firestore.collection("customers").document(customerId).get().await()
             document.toObject<Customer>()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
@@ -21,7 +20,7 @@ class CustomerRepository(private val firestore: FirebaseFirestore) {
         return try {
             firestore.collection("customers").document(customerId).update(updates).await()
             true
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
@@ -30,16 +29,7 @@ class CustomerRepository(private val firestore: FirebaseFirestore) {
         return try {
             firestore.collection("customers").document(customer.customerId).set(customer.toMap()).await()
             true
-        } catch (e: Exception) {
-            false
-        }
-    }
-
-    suspend fun updateCustomerField(customerId: String, field: String, value: Any): Boolean {
-        return try {
-            firestore.collection("customers").document(customerId).update(field, value).await()
-            true
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }

@@ -23,14 +23,14 @@ fun GameScreen(
     cartViewModel: CartViewModel,
     onGameEnd: () -> Unit
 ) {
-    var playsLeft by remember { mutableStateOf(5) }
+    var playsLeft by remember { mutableIntStateOf(5) }
 
-    var score by remember { mutableStateOf(0) }
-    var targetX by remember { mutableStateOf(Random.nextInt(50, 300)) }
-    var targetY by remember { mutableStateOf(Random.nextInt(100, 500)) }
+    var score by remember { mutableIntStateOf(0) }
+    var targetX by remember { mutableIntStateOf(Random.nextInt(50, 300)) }
+    var targetY by remember { mutableIntStateOf(Random.nextInt(100, 500)) }
     var gameFinished by remember { mutableStateOf(false) }
     var didWin by remember { mutableStateOf(false) }
-    var timeLeft by remember { mutableStateOf(10) }
+    var timeLeft by remember { mutableIntStateOf(10) }
     var gameStarted by remember { mutableStateOf(false) }
 
     val pointsAwarded = 10

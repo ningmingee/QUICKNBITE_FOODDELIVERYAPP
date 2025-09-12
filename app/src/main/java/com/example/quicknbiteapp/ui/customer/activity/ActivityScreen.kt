@@ -27,7 +27,8 @@ fun ActivityScreen(
                     Text(
                         text = stringResource(R.string.activity_title),
                         fontSize = 22.sp,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
+
                     )
                 }
             )

@@ -1,6 +1,7 @@
 package com.example.quicknbiteapp.viewModel
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -10,7 +11,7 @@ import com.example.quicknbiteapp.data.model.NotificationItem
 
 class ChatViewModel : ViewModel() {
 
-    var selectedTab by mutableStateOf(0)   // 0 = Chats, 1 = Notifications
+    var selectedTab by mutableIntStateOf(0)   // 0 = Chats, 1 = Notifications
         private set
 
     var selectedChat by mutableStateOf<ChatItem?>(null)

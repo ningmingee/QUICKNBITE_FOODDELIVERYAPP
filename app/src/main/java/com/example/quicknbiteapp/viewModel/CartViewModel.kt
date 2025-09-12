@@ -10,9 +10,6 @@ import com.example.quicknbiteapp.data.model.CartItem
 import com.example.quicknbiteapp.data.model.CartSummary
 import com.example.quicknbiteapp.data.model.DeliveryOption
 
-
-
-// --- Payment Method Enum ---
 enum class PaymentMethod(val label: String) {
     CASH("Cash"),
     ONLINE_BANKING("Online Banking"),
@@ -20,20 +17,14 @@ enum class PaymentMethod(val label: String) {
 }
 
 class CartViewModel : ViewModel() {
-
-    // --- Cart Items ---
     val cartItems = mutableStateListOf<CartItem>()
 
-    // --- Delivery ---
     var deliveryOption by mutableStateOf(DeliveryOption.STANDARD)
     var deliveryTime by mutableStateOf("")  // store user-typed delivery time
 
-    // --- Points earned ---
     var bonusPoints by mutableIntStateOf(0)
         private set
 
-
-    // --- Payment Method ---
     var paymentMethod by mutableStateOf("Cash") // default payment method
         private set
 
@@ -43,7 +34,6 @@ class CartViewModel : ViewModel() {
 
     var deliveryLocation by mutableStateOf("")
 
-    // --- Cart item operations ---
     fun addToCart(item: CartItem) {
         val existing = cartItems.find { it.name == item.name }
         if (existing != null) existing.increaseQuantity()
@@ -68,24 +58,20 @@ class CartViewModel : ViewModel() {
         cartItems.clear()
     }
 
-    // --- Delivery option ---
     fun selectDeliveryOption(option: DeliveryOption) {
         deliveryOption = option
     }
 
-    // --- Delivery time ---
     fun selectDeliveryTime(time: String) {
         deliveryTime = time
     }
 
-    // --- Summary ---
     fun getSummary(): CartSummary {
         val subtotal = cartItems.sumOf { it.getTotalPrice() }
         val deliveryFee = deliveryOption.fee
         return CartSummary(subtotal, deliveryFee)
     }
 
-    // --- Points ---
     fun getSubtotalPoints(): Int = (cartItems.sumOf { it.getTotalPrice() } / 10).toInt()
     fun getTotalPoints(): Int = getSubtotalPoints() + bonusPoints
 

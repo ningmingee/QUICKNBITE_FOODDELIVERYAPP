@@ -22,7 +22,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -120,9 +119,6 @@ fun OrderDetailContent(
     innerPadding: PaddingValues,
     viewModel: VendorViewModel = viewModel()
 ) {
-    val timelineEvents by remember(order) {
-        derivedStateOf { viewModel.getOrderTimeline(order) }
-    }
 
     Column(
         modifier = Modifier
@@ -506,7 +502,7 @@ fun PaymentInfoSection(order: Order) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = order.paymentDetails ?: "",
+                        text = order.paymentDetails,
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -599,11 +595,11 @@ fun TimelineItem(time: String, event: String, isLast: Boolean = false) {
         // Connector line (except for last item)
         if (!isLast) {
             Spacer(modifier = Modifier.width(12.dp))
-            Divider(
+            HorizontalDivider(
                 modifier = Modifier
                     .width(1.dp)
                     .height(24.dp),
-                color = MaterialTheme.colorScheme.outlineVariant
+                thickness = DividerDefaults.Thickness, color = MaterialTheme.colorScheme.outlineVariant
             )
         }
     }

@@ -32,7 +32,7 @@ import kotlinx.coroutines.tasks.await
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
-    private val context = application.applicationContext
+
 
     private var userTypeForSocialLogin: String = "customer"
     private var credentialManager: CredentialManager? = null
@@ -287,22 +287,6 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getCurrentUser(): FirebaseUser? {
         return auth.currentUser
-    }
-
-    fun isUserLoggedIn(): Boolean {
-        return auth.currentUser != null
-    }
-
-    fun getUserDisplayName(): String? {
-        return auth.currentUser?.displayName
-    }
-
-    fun getUserEmail(): String? {
-        return auth.currentUser?.email
-    }
-
-    fun getUserPhotoUrl(): String? {
-        return auth.currentUser?.photoUrl?.toString()
     }
 
     fun signOut() {

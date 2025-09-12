@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,6 +23,9 @@ import com.example.quicknbiteapp.viewModel.CartViewModel
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.HorizontalDivider
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,7 +38,6 @@ fun CartScreen(
     val cartItems = cartViewModel.cartItems
     val summary by remember { derivedStateOf { cartViewModel.getSummary() } }
     val navBarPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-    val bottomBarHeight = 90.dp + navBarPadding
 
     Scaffold(
         topBar = {
@@ -52,7 +53,7 @@ fun CartScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            Icons.Default.ArrowBack,
+                            Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.back_button),
                             tint = MaterialTheme.colorScheme.primary
                         )
@@ -199,7 +200,7 @@ fun CartScreen(
                             .padding(horizontal = 16.dp, vertical = navBarPadding),
                         horizontalAlignment = Alignment.Start
                     ) {
-                        Divider(
+                        HorizontalDivider(
                             thickness = 1.dp,
                             color = MaterialTheme.colorScheme.outlineVariant
                         )

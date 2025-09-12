@@ -4,7 +4,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 
-// === CartItem ===
 data class CartItem(
     override val name: String,
     override val price: Double,
@@ -25,13 +24,11 @@ data class CartItem(
     fun getTotalPrice(): Double = price * quantity
 }
 
-// === DeliveryOption Enum ===
 enum class DeliveryOption(val fee: Double, val label: String) {
     PRIORITY(5.0, "Priority (10-20 min)"),
     STANDARD(3.0, "Standard (30-45 min)")
 }
 
-// === CartSummary ===
 data class CartSummary(
     val subtotal: Double,
     val deliveryFee: Double,

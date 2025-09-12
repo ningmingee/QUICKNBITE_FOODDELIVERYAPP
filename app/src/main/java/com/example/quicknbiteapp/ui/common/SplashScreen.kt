@@ -22,14 +22,12 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(navController: NavHostController, authViewModel: AuthViewModel) {
-    // Navigate to main screen after delay
     val currentUser by authViewModel.currentUser.collectAsState()
     val userType by authViewModel.userType.collectAsState()
 
     LaunchedEffect(Unit) {
         val startTime = System.currentTimeMillis()
 
-        // If user is already logged in, we don't need to wait
         if (currentUser == null || userType == null) {
             delay(2000) // Minimum 2 seconds delay splash screen time
         }
@@ -41,13 +39,11 @@ fun SplashScreen(navController: NavHostController, authViewModel: AuthViewModel)
                 if (elapsed < 2000) {
                     delay(2000 - elapsed)
                 }
-                // No user logged in, go to user selection
                 navController.navigate("userTypeSelect") {
                     popUpTo("splash") { inclusive = true }
                 }
             }
             else -> {
-                // User is logged in, and userType is known
                 when (userType) {
                     "vendor" -> {
                         navController.navigate("vendor_main") {
@@ -61,7 +57,6 @@ fun SplashScreen(navController: NavHostController, authViewModel: AuthViewModel)
                         }
                     }
                     else -> {
-                        // Unknown user type, go to user selection
                         navController.navigate("userTypeSelect") {
                             popUpTo("splash") { inclusive = true }
                         }

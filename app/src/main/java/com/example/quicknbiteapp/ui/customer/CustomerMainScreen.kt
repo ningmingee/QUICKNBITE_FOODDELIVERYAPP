@@ -24,7 +24,6 @@ import com.example.quicknbiteapp.viewModel.CartViewModel
 import com.example.quicknbiteapp.viewModel.ChatViewModel
 import com.example.quicknbiteapp.viewModel.ProfileViewModel
 import com.example.quicknbiteapp.viewModel.HomeViewModel
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.example.quicknbiteapp.utils.LocationManager
 

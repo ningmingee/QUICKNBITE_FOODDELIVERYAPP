@@ -33,8 +33,6 @@ fun VendorMainScreen(
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
 
-    val tabs = listOf("dashboard", "orders", "menu", "settings")
-
     Scaffold(
         bottomBar = {
             VendorBottomNavigation(

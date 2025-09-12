@@ -46,8 +46,6 @@ class VendorViewModel : ViewModel() {
 
     private val _vendorSettings = MutableStateFlow<User?>(null)
     val vendorSettings: StateFlow<User?> = _vendorSettings.asStateFlow()
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     private val firestore = FirebaseFirestore.getInstance()
 
@@ -256,7 +254,7 @@ class VendorViewModel : ViewModel() {
                 null -> "Date not set"
                 else -> "Invalid date"
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             "Invalid date"
         }
     }

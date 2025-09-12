@@ -2,7 +2,6 @@ package com.example.quicknbiteapp
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -47,7 +46,6 @@ import com.example.quicknbiteapp.ui.vendor.VendorOrderDetailScreen
 import com.example.quicknbiteapp.ui.vendor.VendorOrdersScreen
 import com.example.quicknbiteapp.ui.vendor.VendorReviewsScreen
 import com.example.quicknbiteapp.ui.vendor.VendorSettingsScreen
-import com.example.quicknbiteapp.utils.FacebookLoginHelper
 import com.example.quicknbiteapp.viewModel.AuthViewModel
 import com.example.quicknbiteapp.viewModel.CartViewModel
 import com.example.quicknbiteapp.viewModel.ChatViewModel

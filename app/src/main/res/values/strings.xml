@@ -180,8 +180,8 @@
     <string name="chats_tab">Chats</string>
     <string name="notifications_tab">Notifications</string>
     <string name="fat_burger_menu_title">Fat Burger Menu</string>
-    <string name="fat_burger_location">Fat Burger - Jalan BurmaMenu</string>
-    <string name="fat_burger_review_time">4.8 reviews • 10-25 min</string>
+    <string name="fat_burger_location">Fat Burger - Jalan Burma</string>
+    <string name="fat_burger_review_time">4.5 reviews • 10-25 min</string>
 
     <string name="layers_bakeshop_location">Layer\'s Bakeshop - Cafe Town</string>
     <string name="layers_bakeshop_review_time">4.7 reviews • 25-35 min</string>
@@ -189,8 +189,8 @@
     <string name="meal_plans_location">Meal Plans - Healthy Street</string>
     <string name="meal_plans_review_time">4.9 reviews • 10-20 min</string>
 
-    <string name="burger_section">Burger</string>
-    <string name="drink_section">Drink</string>
+    <string name="burger_section">Burgers</string>
+    <string name="drink_section">Drinks</string>
     <string name="layers_bakeshop_title">Layer\'s Bakeshop</string>
     <string name="cake_section">Cake</string>
     <string name="ice_cream_section">Ice Cream</string>

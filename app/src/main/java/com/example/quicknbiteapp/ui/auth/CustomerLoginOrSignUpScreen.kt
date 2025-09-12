@@ -60,7 +60,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.quicknbiteapp.R
 import com.example.quicknbiteapp.ui.theme.QUICKNBITETheme
-import com.example.quicknbiteapp.utils.FacebookLoginHelper
 import com.example.quicknbiteapp.viewModel.AuthViewModel
 import kotlinx.coroutines.launch
 
@@ -114,7 +113,6 @@ fun CustomerLoginOrSignUpScreen(
                 isLoading = false
             }
             else -> {
-                // Handle any other states or do nothing
                 isLoading = false
             }
         }
