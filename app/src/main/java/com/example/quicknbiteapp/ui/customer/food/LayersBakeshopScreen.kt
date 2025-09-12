@@ -1,13 +1,18 @@
 package com.example.quicknbiteapp.ui.customer.food
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -34,7 +39,8 @@ fun LayersBakeshopScreen(
     onCartClick: () -> Unit,
     cartViewModel: CartViewModel
 ) {
-    val menuItems: List<MenuItems> = FoodRepository.getLayersBakeshopMenu()
+    val cakes = FoodRepository.getCake()
+    val iceCreams = FoodRepository.getIceCream()
 
     Scaffold(
         topBar = {
@@ -66,71 +72,141 @@ fun LayersBakeshopScreen(
             )
         }
     ) { padding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(horizontal = 16.dp)
+                .padding(padding),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(bottom = 150.dp)
         ) {
             // Banner
-            Image(
-                painter = painterResource(R.drawable.dessert),
-                contentDescription = "Layer's Bakeshop Banner",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .padding(horizontal = 16.dp),
-                contentScale = ContentScale.Crop
-            )
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.dessert),
+                        contentDescription = "Layers Bakeshop",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Menu items
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp)
-            ) {
-                items(menuItems) { item ->
-                    Card(
+                    // Favorite button
+                    IconButton(
+                        onClick = { /* TODO: Favorite */ },
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                cartViewModel.addToCart(
-                                    CartItem(
-                                        name = item.name,
-                                        price = item.price,
-                                        imageRes = item.imageRes
-                                    )
-                                )
-                                onCartClick()
-                            },
-                        shape = RoundedCornerShape(12.dp),
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp)
+                            .background(
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                                CircleShape
+                            )
+                            .size(36.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.FavoriteBorder,
+                            contentDescription = "Favorite",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    // Card with logo + info
+                    Card(
+                        shape = RoundedCornerShape(20.dp),
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            containerColor = MaterialTheme.colorScheme.surface
                         )
                     ) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(12.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Image(
-                                painter = painterResource(id = item.imageRes),
-                                contentDescription = item.name,
+                                painter = painterResource(id = R.drawable.layerbakeshop_logo),
+                                contentDescription = "Layers Bakeshop",
                                 modifier = Modifier
-                                    .size(80.dp)
-                                    .clip(RoundedCornerShape(8.dp)),
-                                contentScale = ContentScale.Crop
+                                    .size(56.dp)
+                                    .clip(CircleShape)
                             )
                             Spacer(modifier = Modifier.width(12.dp))
-                            Column {
-                                Text(item.name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                                Text("RM ${"%.2f".format(item.price)}", color = Color.Gray)
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    "Layer's Bakeshop - Cafe Town",
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    "4.7 reviews • 25-35 min",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
+
+                            Icon(
+                                imageVector = Icons.Default.Share,
+                                contentDescription = "Share",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp)
+                            )
                         }
                     }
+                }
+            }
+
+            // Cake section
+            item {
+                Text(
+                    text = "Cakes",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 28.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
+
+            items(cakes) { cake ->
+                FoodCard(cake.name, cake.price, cake.imageRes) {
+                    cartViewModel.addToCart(
+                        CartItem(cake.name, cake.price, cake.imageRes)
+                    )
+                    onCartClick()
+                }
+            }
+
+            // Ice Cream section
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Ice Cream",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 28.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
+
+            items(iceCreams) { iceCream ->
+                FoodCard(iceCream.name, iceCream.price, iceCream.imageRes) {
+                    cartViewModel.addToCart(
+                        CartItem(iceCream.name, iceCream.price, iceCream.imageRes)
+                    )
+                    onCartClick()
                 }
             }
         }
     }
 }
+
+
