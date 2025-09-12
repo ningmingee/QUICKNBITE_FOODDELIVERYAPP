@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.quicknbiteapp.repository.CustomerRepository
 import com.example.quicknbiteapp.ui.auth.CustomerLoginOrSignUpScreen
 import com.example.quicknbiteapp.ui.auth.ForgotPasswordScreen
 import com.example.quicknbiteapp.ui.auth.VendorLoginOrSignUpScreen
@@ -61,7 +62,7 @@ fun QuicknBiteAppScreen() {
     val vendorViewModel: VendorViewModel = viewModel()
     val cartViewModel: CartViewModel = viewModel()
     val chatViewModel: ChatViewModel = viewModel()
-    val profileViewModel: ProfileViewModel = viewModel { ProfileViewModel(authViewModel) }
+    val profileViewModel: ProfileViewModel = viewModel { ProfileViewModel(authViewModel, customerRepository = CustomerRepository(firestore = com.google.firebase.firestore.FirebaseFirestore.getInstance())) }
     val homeViewModel: HomeViewModel = viewModel()
 
 

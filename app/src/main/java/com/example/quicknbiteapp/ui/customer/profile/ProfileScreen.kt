@@ -29,6 +29,7 @@ import com.example.quicknbiteapp.viewModel.ProfileViewModel
 import com.example.quicknbiteapp.ui.state.LogoutState
 import com.example.quicknbiteapp.R
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
@@ -41,16 +42,13 @@ fun ProfileScreen(
     val logoutState by profileViewModel.logoutState.collectAsState()
     val showLogoutDialog by profileViewModel.showLogoutDialog.collectAsState()
 
-    // Handle logout state changes
     LaunchedEffect(logoutState) {
         when (logoutState) {
             is LogoutState.Success -> {
-                // Navigate after successful logout
                 profileViewModel.resetLogoutState()
                 onLogout()
             }
             is LogoutState.Error -> {
-                // You could show an error message here
                 profileViewModel.resetLogoutState()
             }
             else -> {}
@@ -64,19 +62,17 @@ fun ProfileScreen(
                     Text(
                         stringResource(R.string.profile_title),
                         fontSize = 22.sp,
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.titleLarge
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             )
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // Show loading overlay during logout
             if (isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
-            // Handle logout state changes
+
             if (logoutState is LogoutState.Loading) {
                 Box(
                     modifier = Modifier
@@ -95,6 +91,7 @@ fun ProfileScreen(
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // Simple Profile Icon (No image upload needed)
                 Box(
                     modifier = Modifier
                         .size(100.dp)
@@ -111,6 +108,7 @@ fun ProfileScreen(
                 }
 
                 Spacer(Modifier.height(16.dp))
+
                 Text(
                     customer?.getDisplayName() ?: "Loading...",
                     fontSize = 20.sp,
@@ -123,7 +121,6 @@ fun ProfileScreen(
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Spacer(Modifier.height(24.dp))
 
                 // Display loyalty points if available
                 customer?.loyaltyPoints?.takeIf { it > 0 }?.let { points ->
@@ -138,7 +135,6 @@ fun ProfileScreen(
 
                 Spacer(Modifier.height(24.dp))
 
-                // Map options with navigation actions
                 val options = profileViewModel.profileOptions.map { item ->
                     when (item.title) {
                         "Settings" -> item.copy(action = { navController.navigate("settings") })
@@ -150,7 +146,6 @@ fun ProfileScreen(
                 options.forEach { ProfileOption(it) }
             }
 
-            // Logout Confirmation Dialog
             if (showLogoutDialog) {
                 AlertDialog(
                     onDismissRequest = { profileViewModel.dismissLogoutConfirmation() },
@@ -177,7 +172,7 @@ fun ProfileOption(item: ProfileItem) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(vertical = 4.dp)
             .clickable { item.action() },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -193,7 +188,7 @@ fun ProfileOption(item: ProfileItem) {
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(24.dp)
             )
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(16.dp))
             Text(
                 item.title,
                 fontSize = 16.sp,

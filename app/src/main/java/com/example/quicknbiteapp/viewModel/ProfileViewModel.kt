@@ -4,10 +4,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.quicknbiteapp.data.model.ProfileItem
-import com.example.quicknbiteapp.data.model.ProfileUser
-import com.example.quicknbiteapp.R
 import com.example.quicknbiteapp.data.model.Customer
+import com.example.quicknbiteapp.data.model.ProfileItem
 import com.example.quicknbiteapp.repository.CustomerRepository
 import com.example.quicknbiteapp.ui.state.LogoutState
 import com.google.firebase.auth.FirebaseAuth
@@ -16,12 +14,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class ProfileViewModel(
+class ProfileViewModel (
     private val authViewModel: AuthViewModel,
     private val customerRepository: CustomerRepository
 ) : ViewModel() {
+
     private val _customer = MutableStateFlow<Customer?>(null)
     val customer: StateFlow<Customer?> = _customer.asStateFlow()
+
     private val _logoutState = MutableStateFlow<LogoutState>(LogoutState.Idle)
     val logoutState: StateFlow<LogoutState> = _logoutState
 
@@ -82,7 +82,7 @@ class ProfileViewModel(
         ProfileItem(Icons.Default.ShoppingCart, "My Orders") { viewOrders() },
         ProfileItem(Icons.Default.Settings, "Settings") { openSettings() },
         ProfileItem(Icons.Default.Help, "Help / Support") { openHelp() },
-        ProfileItem(Icons.Default.Logout, "Logout") { logout() }
+        ProfileItem(Icons.Default.Logout, "Logout") { showLogoutConfirmation() }
     )
 
     private fun editProfile() { /* TODO: navigate to edit profile */ }
@@ -102,7 +102,6 @@ class ProfileViewModel(
         viewModelScope.launch {
             _logoutState.value = LogoutState.Loading
             try {
-                // Simulate logout process
                 authViewModel.signOut()
                 _logoutState.value = LogoutState.Success
             } catch (e: Exception) {
@@ -115,4 +114,3 @@ class ProfileViewModel(
         _logoutState.value = LogoutState.Idle
     }
 }
-
