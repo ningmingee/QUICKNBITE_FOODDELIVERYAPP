@@ -108,7 +108,7 @@ fun HomeScreen(
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.order_tracking),
-                    contentDescription = "Order Tracking",
+                    contentDescription = stringResource(R.string.order_tracking_title),
                     modifier = Modifier.size(32.dp),
                     tint = Color.White
                 )
@@ -152,7 +152,7 @@ fun HomeScreen(
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Search,
-                            contentDescription = "Search Icon",
+                            contentDescription = stringResource(R.string.search_icon),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
@@ -161,7 +161,7 @@ fun HomeScreen(
                             IconButton(onClick = { homeViewModel.updateSearchQuery("") }) {
                                 Icon(
                                     imageVector = Icons.Default.Clear,
-                                    contentDescription = "Clear Search"
+                                    contentDescription = stringResource(R.string.clear_search),
                                 )
                             }
                         }

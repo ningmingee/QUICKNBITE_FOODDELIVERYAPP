@@ -220,10 +220,12 @@ fun QuicknBiteAppScreen() {
         }
         composable("mealplans") {
             MealPlansScreen(
+                cartViewModel = cartViewModel,
                 onBack = { navController.popBackStack() },
-                cartViewModel = cartViewModel
+                onCartClick = { navController.navigate("cart") }
             )
         }
+
         composable("order") {
             DiscountOrderScreen(
                 onBack = { navController.popBackStack() },

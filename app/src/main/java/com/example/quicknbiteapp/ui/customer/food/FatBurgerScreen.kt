@@ -84,7 +84,7 @@ fun FatBurgerScreen(
                 ) {
                     Image(
                         painter = painterResource(R.drawable.fatburger_banner),
-                        contentDescription = "Fat Burger Banner",
+                        contentDescription = stringResource(R.string.fat_burger_banner),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
@@ -103,7 +103,7 @@ fun FatBurgerScreen(
                     ) {
                         Icon(
                             Icons.Default.FavoriteBorder,
-                            contentDescription = "Favorite",
+                            contentDescription = stringResource(R.string.favorite),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -126,7 +126,7 @@ fun FatBurgerScreen(
                         ) {
                             Image(
                                 painter = painterResource(id = R.drawable.fatburger_logo),
-                                contentDescription = "Fat Burger",
+                                contentDescription = stringResource(R.string.fat_burger),
                                 modifier = Modifier
                                     .size(56.dp)
                                     .clip(CircleShape)
@@ -135,13 +135,13 @@ fun FatBurgerScreen(
 
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    "Fat Burger - Jalan Burma",
+                                    stringResource(R.string.fat_burger_location),
                                     fontWeight = FontWeight.Bold,
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                                 Spacer(modifier = Modifier.height(6.dp))
                                 Text(
-                                    "4.8 reviews • 10-25 min",
+                                    stringResource(R.string.fat_burger_review_time),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -149,7 +149,7 @@ fun FatBurgerScreen(
 
                             Icon(
                                 imageVector = Icons.Default.Share,
-                                contentDescription = "Share",
+                                contentDescription = stringResource(R.string.share),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(20.dp)
                             )

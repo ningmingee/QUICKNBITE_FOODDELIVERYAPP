@@ -89,7 +89,7 @@ fun LayersBakeshopScreen(
                 ) {
                     Image(
                         painter = painterResource(R.drawable.dessert),
-                        contentDescription = "Layers Bakeshop",
+                        contentDescription = stringResource(R.string.layers_bakeshop_title),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
@@ -108,7 +108,7 @@ fun LayersBakeshopScreen(
                     ) {
                         Icon(
                             Icons.Default.FavoriteBorder,
-                            contentDescription = "Favorite",
+                            contentDescription = stringResource(R.string.favorite),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -131,7 +131,7 @@ fun LayersBakeshopScreen(
                         ) {
                             Image(
                                 painter = painterResource(id = R.drawable.layerbakeshop_logo),
-                                contentDescription = "Layers Bakeshop",
+                                contentDescription = stringResource(R.string.layers_bakeshop_title),
                                 modifier = Modifier
                                     .size(56.dp)
                                     .clip(CircleShape)
@@ -140,13 +140,13 @@ fun LayersBakeshopScreen(
 
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    "Layer's Bakeshop - Cafe Town",
+                                    stringResource(R.string.layers_bakeshop_location),
                                     fontWeight = FontWeight.Bold,
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                                 Spacer(modifier = Modifier.height(6.dp))
                                 Text(
-                                    "4.7 reviews • 25-35 min",
+                                    stringResource(R.string.layers_bakeshop_review_time),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -154,7 +154,7 @@ fun LayersBakeshopScreen(
 
                             Icon(
                                 imageVector = Icons.Default.Share,
-                                contentDescription = "Share",
+                                contentDescription = stringResource(R.string.share),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(20.dp)
                             )
@@ -166,7 +166,7 @@ fun LayersBakeshopScreen(
             // Cake section
             item {
                 Text(
-                    text = "Cakes",
+                    stringResource(R.string.cake_section),
                     fontWeight = FontWeight.Bold,
                     fontSize = 28.sp,
                     color = MaterialTheme.colorScheme.primary,
@@ -188,7 +188,7 @@ fun LayersBakeshopScreen(
             item {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Ice Cream",
+                    stringResource(R.string.ice_cream_section),
                     fontWeight = FontWeight.Bold,
                     fontSize = 28.sp,
                     color = MaterialTheme.colorScheme.primary,

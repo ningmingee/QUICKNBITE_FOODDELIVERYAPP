@@ -32,4 +32,24 @@ object FoodRepository {
     MenuItems("Mango Ice Cream", 8.0, R.drawable.manggo_ice_cream),
     MenuItems("Blueberry Ice Cream", 6.5, R.drawable.blueberry_ice_cream)
     )
+
+    fun getMealPlansBreakfast(): List<MenuItems> = listOf(
+        MenuItems("Breakfast Set 1", 10.0, R.drawable.breakfast_set_1),
+        MenuItems("Breakfast Set 2", 10.0, R.drawable.breakfast_set_2),
+        MenuItems("Breakfast Set 3", 10.0, R.drawable.breakfast_set_3)
+        )
+
+    fun getMealPlansLunch(): List<MenuItems> = listOf(
+        MenuItems("Lunch Set 1", 12.0, R.drawable.lunch_set_1),
+        MenuItems("Lunch Set 2", 12.0, R.drawable.lunch_set_2),
+        MenuItems("Lunch Set 3", 12.0, R.drawable.lunch_set_3)
+    )
+
+    fun getMealPlansDinner(): List<MenuItems> = listOf(
+        MenuItems("Dinner Set 1", 11.0, R.drawable.dinner_set_1),
+        MenuItems("Dinner Set 2", 11.0, R.drawable.dinner_set_2),
+        MenuItems("Dinner Set 3", 11.0, R.drawable.dinner_set_3)
+    )
+
+
 }

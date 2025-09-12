@@ -79,7 +79,8 @@ fun CartScreen(
                         Text(
                             text = stringResource(R.string.order),
                             fontSize = 20.sp,
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.Medium,
+                            style = MaterialTheme.typography.titleMedium
                         )
                         Button(onClick = onAddItem) {
                             Text(stringResource(R.string.add_item))
@@ -157,7 +158,7 @@ fun CartScreen(
                                             IconButton(onClick = { cartViewModel.decreaseItemQuantity(item) }) {
                                                 Icon(
                                                     Icons.Default.Remove,
-                                                    contentDescription = "Decrease",
+                                                    contentDescription = stringResource(R.string.decrease),
                                                     tint = MaterialTheme.colorScheme.onSurface
                                                 )
                                             }
@@ -169,7 +170,7 @@ fun CartScreen(
                                             IconButton(onClick = { cartViewModel.increaseItemQuantity(item) }) {
                                                 Icon(
                                                     Icons.Default.Add,
-                                                    contentDescription = "Increase",
+                                                    contentDescription = stringResource(R.string.increase),
                                                     tint = MaterialTheme.colorScheme.onSurface
                                                 )
                                             }
@@ -177,7 +178,7 @@ fun CartScreen(
                                         IconButton(onClick = { cartViewModel.removeItem(item) }) {
                                             Icon(
                                                 Icons.Default.Delete,
-                                                contentDescription = "Delete",
+                                                contentDescription = stringResource(R.string.delete),
                                                 tint = MaterialTheme.colorScheme.error
                                             )
                                         }
