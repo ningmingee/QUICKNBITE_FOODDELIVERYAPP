@@ -26,6 +26,7 @@ import java.util.Date
 import java.util.Locale
 
 class VendorViewModel : ViewModel() {
+
     private val TAG = "VendorViewModel"
 
     private val vendorRepository: VendorRepository by lazy {
@@ -48,7 +49,7 @@ class VendorViewModel : ViewModel() {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-
+    private val firestore = FirebaseFirestore.getInstance()
 
     init {
         Log.d(TAG, "ViewModel created")
@@ -56,31 +57,38 @@ class VendorViewModel : ViewModel() {
         debugFirestorePaths()
     }
 
-    fun getCurrentVendorId(): String {
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        val vendorId = currentUser?.uid ?: "test_vendor_001" // Fallback for testing
+    fun getCurrentVendorId(): String? {
+        val firebaseUser = auth.currentUser
 
         Log.d(TAG, "=== CURRENT USER INFO ===")
-        Log.d(TAG, "Firebase Auth Current User: $currentUser")
-        Log.d(TAG, "User UID: ${currentUser?.uid}")
-        Log.d(TAG, "User Email: ${currentUser?.email}")
-        Log.d(TAG, "User Display Name: ${currentUser?.displayName}")
-        Log.d(TAG, "Is User Authenticated: ${currentUser != null}")
-        Log.d(TAG, "Using Vendor ID: $vendorId")
+        Log.d(TAG, "Firebase Auth Current User object: $firebaseUser")
+        Log.d(TAG, "User UID: ${firebaseUser?.uid}")
+        Log.d(TAG, "User Email: ${firebaseUser?.email}")
+        Log.d(TAG, "User Display Name: ${firebaseUser?.displayName}")
+        Log.d(TAG, "Is User Authenticated: ${firebaseUser != null}")
         Log.d(TAG, "=== END USER INFO ===")
 
-        return vendorId
+        return firebaseUser?.uid
     }
 
     fun debugFirestorePaths() {
         viewModelScope.launch {
             val vendorId = getCurrentVendorId()
-            Log.d(TAG, "=== FIRESTORE PATH DEBUG ===")
-            Log.d(TAG, "Checking existence of documents for vendorId: $vendorId")
+
+            if (vendorId == null) {
+                Log.w(TAG, "debugFirestorePaths: No authenticated user. Skipping Firestore path debugging.")
+                Log.d(TAG, "=== FIRESTORE PATH DEBUG (No User Authenticated) ===")
+                Log.d(TAG, "Firebase Auth Current User: ${auth.currentUser} at time of debug call.")
+                Log.d(TAG, "=== END FIRESTORE PATH DEBUG ===")
+                return@launch
+            }
+
+            Log.d(TAG, "=== FIRESTORE PATH DEBUG (User ID: $vendorId) ===")
+            Log.d(TAG, "Attempting to check various Firestore paths for vendorId: $vendorId")
 
             // Check vendors collection
             try {
-                val vendorDoc = FirebaseFirestore.getInstance().collection("vendors").document(vendorId).get().await()
+                val vendorDoc = firestore.collection("vendors").document(vendorId).get().await()
                 Log.d(TAG, "Vendors collection - Document exists: ${vendorDoc.exists()}")
                 if (vendorDoc.exists()) {
                     Log.d(TAG, "Vendors document data: ${vendorDoc.data}")
@@ -91,7 +99,7 @@ class VendorViewModel : ViewModel() {
 
             // Check users collection
             try {
-                val userDoc = FirebaseFirestore.getInstance().collection("users").document(vendorId).get().await()
+                val userDoc = firestore.collection("users").document(vendorId).get().await()
                 Log.d(TAG, "Users collection - Document exists: ${userDoc.exists()}")
                 if (userDoc.exists()) {
                     Log.d(TAG, "Users document data: ${userDoc.data}")
@@ -102,7 +110,7 @@ class VendorViewModel : ViewModel() {
 
             // Check menuItems collection
             try {
-                val menuItemsSnapshot = FirebaseFirestore.getInstance().collection("menuItems")
+                val menuItemsSnapshot = firestore.collection("menuItems")
                     .whereEqualTo("vendorId", vendorId)
                     .get()
                     .await()
@@ -116,7 +124,7 @@ class VendorViewModel : ViewModel() {
 
             // Check orders collection
             try {
-                val ordersSnapshot = FirebaseFirestore.getInstance().collection("orders")
+                val ordersSnapshot = firestore.collection("orders")
                     .whereEqualTo("vendorId", vendorId)
                     .get()
                     .await()
@@ -135,17 +143,22 @@ class VendorViewModel : ViewModel() {
     fun loadVendorData() {
         viewModelScope.launch {
             _uiState.value = VendorUiState.Loading
-            val userId = getCurrentVendorId()
 
             try {
+                val userId = getCurrentVendorId()
+                if (userId == null) {
+                    Log.e(TAG, "❌ Cannot load vendor data: No authenticated user")
+                    _uiState.value = VendorUiState.Error("Please login to access vendor dashboard")
+                    return@launch
+                }
+
                 Log.d(TAG, "Loading vendor data for user: $userId")
                 val vendorResult = vendorRepository.getVendorData(userId)
 
                 if (vendorResult.isSuccess) {
                     val vendor = vendorResult.getOrThrow()
-                    loadVendorReviews()
+                    loadVendorReviews(userId)
 
-                    // DEBUG: LOG ALL THE DATA YOU'RE GETTING
                     Log.d(TAG, "=== VENDOR DATA RECEIVED ===")
                     Log.d(TAG, "Business: ${vendor.businessName}")
                     Log.d(TAG, "Monthly Revenue: ${vendor.monthlyRevenue}")
@@ -168,45 +181,31 @@ class VendorViewModel : ViewModel() {
                             menuItems = menuItemsResult.getOrThrow(),
                             orders = ordersResult.getOrThrow()
                         )
+                    } else {
+                        _uiState.value = VendorUiState.Error("Failed to load menu items or orders")
                     }
+                } else {
+                    _uiState.value = VendorUiState.Error("Failed to load vendor data: ${vendorResult.exceptionOrNull()?.message}")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error loading vendor data: ${e.message}")
+                _uiState.value = VendorUiState.Error("Failed to load data: ${e.message}")
             }
         }
     }
 
-    fun formatOrderDate(dateValue: Any?): String {
-        return try {
-            when (dateValue) {
-                is Timestamp -> {
-                    val dateFormat = SimpleDateFormat("dd/MM/yyyy - HH:mm", Locale.getDefault())
-                    dateFormat.format(dateValue.toDate())
-                }
-                is Date -> {
-                    val dateFormat = SimpleDateFormat("dd/MM/yyyy - HH:mm", Locale.getDefault())
-                    dateFormat.format(dateValue)
-                }
-                is Long -> {
-                    val dateFormat = SimpleDateFormat("dd/MM/yyyy - HH:mm", Locale.getDefault())
-                    dateFormat.format(Date(dateValue))
-                }
-                is String -> dateValue
-                null -> "Date not set"
-                else -> "Invalid date"
-            }
-        } catch (e: Exception) {
-            "Invalid date"
-        }
-    }
-
-    fun loadVendorReviews() {
+    fun loadVendorReviews(vendorId: String? = null) {
         viewModelScope.launch {
             try {
-                val vendorId = getCurrentVendorId()
-                Log.d(TAG, "Loading reviews for vendor: $vendorId")
+                val targetVendorId = vendorId ?: getCurrentVendorId()
+                if (targetVendorId == null) {
+                    Log.e(TAG, "❌ Cannot load reviews: No vendor ID provided")
+                    return@launch
+                }
 
-                val reviewsResult = vendorRepository.getVendorReviews(vendorId)
+                Log.d(TAG, "Loading reviews for vendor: $targetVendorId")
+                val reviewsResult = vendorRepository.getVendorReviews(targetVendorId)
+
                 if (reviewsResult.isSuccess) {
                     val reviews = reviewsResult.getOrThrow()
                     Log.d(TAG, "Successfully loaded ${reviews.size} reviews")
@@ -238,20 +237,41 @@ class VendorViewModel : ViewModel() {
         Log.d(TAG, "Calculated stats: Average=$averageRating, Total=$totalReviews")
     }
 
+    fun formatOrderDate(dateValue: Any?): String {
+        return try {
+            when (dateValue) {
+                is Timestamp -> {
+                    val dateFormat = SimpleDateFormat("dd/MM/yyyy - HH:mm", Locale.getDefault())
+                    dateFormat.format(dateValue.toDate())
+                }
+                is Date -> {
+                    val dateFormat = SimpleDateFormat("dd/MM/yyyy - HH:mm", Locale.getDefault())
+                    dateFormat.format(dateValue)
+                }
+                is Long -> {
+                    val dateFormat = SimpleDateFormat("dd/MM/yyyy - HH:mm", Locale.getDefault())
+                    dateFormat.format(Date(dateValue))
+                }
+                is String -> dateValue
+                null -> "Date not set"
+                else -> "Invalid date"
+            }
+        } catch (e: Exception) {
+            "Invalid date"
+        }
+    }
+
     fun getOrderTimeline(order: Order): List<Pair<String, String>> {
         val timeline = mutableListOf<Pair<String, String>>()
         val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
 
-        // Add status changes from history in chronological order
         val statusEvents = order.getStatusEvents()
 
         if (statusEvents.isEmpty()) {
-            // If no status history, just show creation time
             timeline.add(
                 dateFormat.format(order.getCreationDate()) to "Order received"
             )
         } else {
-            // Add each status event with proper description
             statusEvents.forEach { (status, timestamp) ->
                 val time = dateFormat.format(timestamp)
                 val event = when (status) {
@@ -272,16 +292,13 @@ class VendorViewModel : ViewModel() {
         val timeline = mutableListOf<Pair<String, String>>()
         val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
 
-        // Always show order creation as the first event
         timeline.add(
             dateFormat.format(order.getCreationDate()) to "Order placed"
         )
 
-        // Get status events excluding PENDING (since we already have "Order placed")
         val statusEvents = order.getStatusEvents()
             .filter { it.first != OrderStatus.PENDING }
 
-        // Add other status events
         statusEvents.forEach { (status, timestamp) ->
             val time = dateFormat.format(timestamp)
             val event = when (status) {
@@ -289,7 +306,7 @@ class VendorViewModel : ViewModel() {
                 OrderStatus.READY_FOR_PICKUP -> "Order ready for pickup"
                 OrderStatus.COMPLETED -> "Order delivered"
                 OrderStatus.CANCELLED -> "Order cancelled"
-                else -> "Status updated" // Should not happen due to filter
+                else -> "Status updated"
             }
             timeline.add(time to event)
         }
@@ -301,7 +318,6 @@ class VendorViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 vendorRepository.updateOrderStatus(orderId, status)
-                // Reload data after update
                 loadVendorData()
             } catch (e: Exception) {
                 Log.e(TAG, "Error updating order: ${e.message}")
@@ -313,6 +329,11 @@ class VendorViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val vendorId = getCurrentVendorId()
+                if (vendorId == null) {
+                    Log.e(TAG, "❌ Cannot load settings: No authenticated user")
+                    return@launch
+                }
+
                 val settings = settingsRepository.getVendorSettings(vendorId)
                 _vendorSettings.value = settings
             } catch (e: Exception) {
@@ -336,14 +357,16 @@ class VendorViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val vendorId = getCurrentVendorId()
+                if (vendorId == null) {
+                    Log.e(TAG, "❌ Cannot update business info: No authenticated user")
+                    return@launch
+                }
+
                 val success = settingsRepository.updateBusinessInfo(
                     vendorId, businessName, address, operatingHours
                 )
                 if (success) {
-                    loadVendorSettings() // Reload settings
-                    // Show success message
-                } else {
-                    // Show error message
+                    loadVendorSettings()
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error updating business info: ${e.message}")
@@ -355,16 +378,18 @@ class VendorViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val vendorId = getCurrentVendorId()
+                if (vendorId == null) {
+                    Log.e(TAG, "❌ Cannot update account info: No authenticated user")
+                    return@launch
+                }
+
                 val success = settingsRepository.updateAccountInfo(vendorId, displayName, phoneNumber)
                 if (success) {
                     _vendorSettings.value = _vendorSettings.value?.copy(
                         businessName = displayName,
                         phoneNumber = phoneNumber
                     )
-                    loadVendorSettings() // Reload settings
-                    // Show success message
-                } else {
-                    // Show error message
+                    loadVendorSettings()
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error updating account info: ${e.message}")
@@ -376,6 +401,11 @@ class VendorViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val vendorId = getCurrentVendorId()
+                if (vendorId == null) {
+                    Log.e(TAG, "❌ Cannot update notification settings: No authenticated user")
+                    return@launch
+                }
+
                 val success = settingsRepository.updateNotificationSettings(vendorId, pushEnabled, emailEnabled)
                 if (success) {
                     _vendorSettings.value = _vendorSettings.value?.copy(

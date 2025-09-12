@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.example.quicknbiteapp.data.model.ProfileItem
 import com.example.quicknbiteapp.viewModel.ProfileViewModel
 import com.example.quicknbiteapp.ui.state.LogoutState
@@ -34,7 +36,8 @@ fun ProfileScreen(
     navController: NavHostController,
     onLogout: () -> Unit
 ) {
-    val user = profileViewModel.user
+    val customer by profileViewModel.customer.collectAsState()
+    val isLoading by profileViewModel.isLoading.collectAsState()
     val logoutState by profileViewModel.logoutState.collectAsState()
     val showLogoutDialog by profileViewModel.showLogoutDialog.collectAsState()
 
@@ -70,6 +73,10 @@ fun ProfileScreen(
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
             // Show loading overlay during logout
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+            // Handle logout state changes
             if (logoutState is LogoutState.Loading) {
                 Box(
                     modifier = Modifier
@@ -88,35 +95,54 @@ fun ProfileScreen(
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Profile image + info
-                Image(
-                    painter = painterResource(id = user.profileImageRes),
-                    contentDescription = "Profile Picture",
+                Box(
                     modifier = Modifier
                         .size(100.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Profile",
+                        modifier = Modifier.size(50.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    customer?.getDisplayName() ?: "Loading...",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
-                Spacer(Modifier.height(12.dp))
                 Text(
-                    user.name,
-                    fontSize = 20.sp,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    user.email,
+                    customer?.email ?: "",
                     fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                Spacer(Modifier.height(24.dp))
+
+                // Display loyalty points if available
+                customer?.loyaltyPoints?.takeIf { it > 0 }?.let { points ->
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        "$points Loyalty Points",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
                 Spacer(Modifier.height(24.dp))
 
                 // Map options with navigation actions
                 val options = profileViewModel.profileOptions.map { item ->
                     when (item.title) {
                         "Settings" -> item.copy(action = { navController.navigate("settings") })
-                        "Logout" -> item.copy(action = { profileViewModel.logout() })
+                        "Logout" -> item.copy(action = { profileViewModel.showLogoutConfirmation() })
                         else -> item
                     }
                 }
@@ -128,34 +154,16 @@ fun ProfileScreen(
             if (showLogoutDialog) {
                 AlertDialog(
                     onDismissRequest = { profileViewModel.dismissLogoutConfirmation() },
-                    title = {
-                        Text(
-                            text = stringResource(R.string.logout_dialog_title),
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                    },
-                    text = {
-                        Text(stringResource(R.string.logout_confirmation))
-                    },
+                    title = { Text("Logout") },
+                    text = { Text("Are you sure you want to logout?") },
                     confirmButton = {
-                        Button(
-                            onClick = {
-                                profileViewModel.logout()
-                                profileViewModel.dismissLogoutConfirmation()
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary
-                            )
-                        ) {
-                            Text(stringResource(R.string.logout_button))
+                        Button(onClick = { profileViewModel.logout() }) {
+                            Text("Logout")
                         }
                     },
                     dismissButton = {
-                        OutlinedButton(
-                            onClick = { profileViewModel.dismissLogoutConfirmation() }
-                        ) {
-                            Text(stringResource(R.string.cancel_button))
+                        OutlinedButton(onClick = { profileViewModel.dismissLogoutConfirmation() }) {
+                            Text("Cancel")
                         }
                     }
                 )
@@ -182,13 +190,15 @@ fun ProfileOption(item: ProfileItem) {
             Icon(
                 item.icon,
                 contentDescription = item.title,
-                tint = MaterialTheme.colorScheme.primary
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(24.dp)
             )
             Spacer(Modifier.width(12.dp))
             Text(
                 item.title,
                 fontSize = 16.sp,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }

@@ -120,12 +120,24 @@ fun VendorDashboardScreen(
                     modifier = modifier.fillMaxSize()
                 )
             }
-            is VendorUiState.Empty -> {
-                EmptyStateScreen(
-                    message = state.message,
-                    onRetry = { viewModel.refreshData() },
+            is VendorUiState.Idle -> {
+                // Decide what to show in the Idle state
+                // For example, you could show a loading indicator,
+                // a placeholder, or nothing.
+                // If you want to show nothing or the same as loading:
+                LoadingScreen(modifier = modifier.fillMaxSize(), message = "Idle state...") // Or some other UI
+            }
+            is VendorUiState.NotAuthenticated -> {
+                // Decide what to show when not authenticated
+                // For example, navigate to a login screen or show a message.
+                // If you want to show an error or a specific message:
+                ErrorScreen(
+                    message = "User is not authenticated. Please log in.",
+                    onRetry = { /* Maybe navigate to login or try to re-authenticate */ },
                     modifier = modifier.fillMaxSize()
                 )
+                // Or navigate:
+                // navController.navigate("login_route") // Example
             }
         }
     }

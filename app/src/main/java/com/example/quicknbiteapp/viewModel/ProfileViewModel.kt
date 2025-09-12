@@ -7,26 +7,75 @@ import androidx.lifecycle.viewModelScope
 import com.example.quicknbiteapp.data.model.ProfileItem
 import com.example.quicknbiteapp.data.model.ProfileUser
 import com.example.quicknbiteapp.R
+import com.example.quicknbiteapp.data.model.Customer
+import com.example.quicknbiteapp.repository.CustomerRepository
 import com.example.quicknbiteapp.ui.state.LogoutState
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(
-    private val authViewModel: AuthViewModel
+    private val authViewModel: AuthViewModel,
+    private val customerRepository: CustomerRepository
 ) : ViewModel() {
-
+    private val _customer = MutableStateFlow<Customer?>(null)
+    val customer: StateFlow<Customer?> = _customer.asStateFlow()
     private val _logoutState = MutableStateFlow<LogoutState>(LogoutState.Idle)
     val logoutState: StateFlow<LogoutState> = _logoutState
 
     private val _showLogoutDialog = MutableStateFlow(false)
     val showLogoutDialog: StateFlow<Boolean> = _showLogoutDialog
 
-    val user = ProfileUser(
-        name = "Ooi Mei Yi",
-        email = "ooimeiyi@gmail.com",
-        profileImageRes = R.drawable.profile
-    )
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    init {
+        loadCustomerData()
+    }
+
+    fun loadCustomerData() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val currentUser = FirebaseAuth.getInstance().currentUser
+                currentUser?.uid?.let { customerId ->
+                    val customerData = customerRepository.getCustomer(customerId)
+                    _customer.value = customerData ?: createNewCustomer(customerId, currentUser)
+                }
+            } catch (e: Exception) {
+                // Handle error
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    private suspend fun createNewCustomer(
+        customerId: String,
+        firebaseUser: com.google.firebase.auth.FirebaseUser
+    ): Customer {
+        val newCustomer = Customer(
+            customerId = customerId,
+            email = firebaseUser.email ?: "",
+            fullName = firebaseUser.displayName ?: "Customer",
+            phoneNumber = firebaseUser.phoneNumber ?: ""
+        )
+
+        customerRepository.createCustomer(newCustomer)
+        return newCustomer
+    }
+
+    fun updateCustomerProfile(updates: Map<String, Any>) {
+        viewModelScope.launch {
+            val customerId = FirebaseAuth.getInstance().currentUser?.uid ?: return@launch
+            val success = customerRepository.updateCustomer(customerId, updates)
+            if (success) {
+                loadCustomerData() // Reload updated data
+            }
+        }
+    }
 
     val profileOptions = listOf(
         ProfileItem(Icons.Default.Person, "Edit Profile") { editProfile() },

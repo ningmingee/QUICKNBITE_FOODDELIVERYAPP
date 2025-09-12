@@ -7,10 +7,11 @@ import com.example.quicknbiteapp.data.model.Vendor
 sealed interface VendorUiState {
     object Loading : VendorUiState
     data class Success(
-        val vendor: Vendor,
-        val menuItems: List<MenuItem>,
-        val orders: List<Order>
+        val vendor: Vendor, // Replace 'Vendor' with your actual Vendor data class
+        val menuItems: List<MenuItem>, // Replace 'MenuItem' with your actual MenuItem data class
+        val orders: List<Order> // Replace 'Order' with your actual Order data class
     ) : VendorUiState
     data class Error(val message: String) : VendorUiState
-    data class Empty(val message: String) : VendorUiState
+    object NotAuthenticated : VendorUiState // Added for clarity
+    object Idle : VendorUiState // Optional: an initial state before loading starts
 }
