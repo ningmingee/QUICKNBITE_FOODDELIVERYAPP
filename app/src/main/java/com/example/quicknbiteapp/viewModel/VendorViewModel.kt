@@ -49,6 +49,7 @@ class VendorViewModel : ViewModel() {
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
 
+
     init {
         Log.d(TAG, "ViewModel created")
         loadVendorData()
@@ -356,6 +357,10 @@ class VendorViewModel : ViewModel() {
                 val vendorId = getCurrentVendorId()
                 val success = settingsRepository.updateAccountInfo(vendorId, displayName, phoneNumber)
                 if (success) {
+                    _vendorSettings.value = _vendorSettings.value?.copy(
+                        businessName = displayName,
+                        phoneNumber = phoneNumber
+                    )
                     loadVendorSettings() // Reload settings
                     // Show success message
                 } else {
