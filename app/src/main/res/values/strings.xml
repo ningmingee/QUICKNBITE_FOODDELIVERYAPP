@@ -181,6 +181,9 @@
     <string name="burger_section">Burger</string>
     <string name="drink_section">Drink</string>
     <string name="layers_bakeshop_title">Layer\'s Bakeshop</string>
+    <string name="cake_section">Cake</string>
+    <string name="ice_cream_section">Ice Cream</string>
+
 
 
     <string name="game_title">Game</string>

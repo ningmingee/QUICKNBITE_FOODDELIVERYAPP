@@ -126,14 +126,14 @@ fun HomeScreen(
         ) {
             // Address
             item {
-                userLocation?.let { location ->
+                //userLocation?.let { location ->
                     Text(
-                        text = "Your location: ${userLocation?.address ?: "Unknown"}",
-                        fontSize = 14.sp,
+                        text = "Location: ${userLocation?.address ?: "Unknown"}",
+                        fontSize = 18.sp,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
-                }
+
             }
 
             // Search bar
@@ -180,14 +180,14 @@ fun HomeScreen(
                 Column {
                     Text(
                         text = stringResource(R.string.good_morning),
-                        fontSize = 22.sp,
+                        fontSize = 25.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.headlineSmall
                     )
                     Text(
                         text = stringResource(R.string.rise_and_shine),
-                        fontSize = 14.sp,
+                        fontSize = 18.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -220,7 +220,7 @@ fun HomeScreen(
                 Text(
                     stringResource(R.string.restaurant),
                     fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
+                    fontSize = 30.sp,
                     style = MaterialTheme.typography.titleMedium
                 )
             }
@@ -231,7 +231,7 @@ fun HomeScreen(
                     Text(
                         stringResource(R.string.no_restaurant),
                         fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp,
+                        fontSize = 25.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(8.dp)
                     )
@@ -307,12 +307,13 @@ fun RestaurantItem(title: String,
             Column(modifier = Modifier.padding(8.dp)) {
                 Text(
                     title,
+                    fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Text(
                     subtitle,
-                    fontSize = 12.sp,
+                    fontSize = 18.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall
                 )
