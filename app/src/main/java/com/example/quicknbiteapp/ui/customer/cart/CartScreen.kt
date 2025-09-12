@@ -91,7 +91,7 @@ fun CartScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(horizontal = 16.dp)
-                            .padding(bottom = 120.dp),
+                            .padding(bottom = 160.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         if (cartItems.isEmpty()) {

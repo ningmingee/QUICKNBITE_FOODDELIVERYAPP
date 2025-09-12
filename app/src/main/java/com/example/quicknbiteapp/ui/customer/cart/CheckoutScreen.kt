@@ -123,9 +123,14 @@ fun CheckoutScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 120.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(horizontal = 16.dp), // just horizontal padding
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(
+                    start = 0.dp,
+                    end = 0.dp,
+                    top = innerPadding.calculateTopPadding(),
+                    bottom = innerPadding.calculateBottomPadding() + 16.dp // extra 16.dp to lower it slightly
+                )
             ) {
                 // Order Summary + Add Item
                 item {
@@ -428,6 +433,7 @@ fun CheckoutScreen(
                             }
                         }
                     }
+                    Spacer(modifier = Modifier.height(150.dp))
                 }
             }
 
